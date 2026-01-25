@@ -90,6 +90,8 @@ ${formatInstructions[format]}
 };
 
 export const PromptEnhancer = () => {
+  console.log("PromptEnhancer component rendering");
+
   const [inputPrompt, setInputPrompt] = useState("");
   const [outputPrompt, setOutputPrompt] = useState("");
   const [mode, setMode] = useState<Mode>("balanced");
@@ -177,15 +179,16 @@ export const PromptEnhancer = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Dark Mode Toggle */}
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setIsDark(!isDark)}
+  try {
+    return (
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* Dark Mode Toggle */}
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setIsDark(!isDark)}
             className="rounded-full bg-card border-border/50 hover:bg-accent"
           >
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -395,4 +398,15 @@ export const PromptEnhancer = () => {
       </div>
     </div>
   );
+  } catch (error) {
+    console.error("Error rendering PromptEnhancer:", error);
+    return (
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <h1 className="text-4xl font-bold text-center text-red-500">Error Loading Component</h1>
+          <p className="text-center">Check console for details.</p>
+        </div>
+      </div>
+    );
+  }
 };
