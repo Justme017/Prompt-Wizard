@@ -1,7 +1,6 @@
 {
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  "version": 2,
+  "buildCommand": "echo 'Build complete'",
+  "outputDirectory": "public",
+  "framework": null
 }
