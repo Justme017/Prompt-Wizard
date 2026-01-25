@@ -1,16 +1,46 @@
-# Prompt Optimizer (Vercel-ready)
+# Prompt Optimizer (React + Vercel)
 
-A serverless prompt optimization tool for LLMs, designed to run natively on Vercel's free tier.
+A modern, full-stack prompt optimization tool built with React, TypeScript, Tailwind CSS, and shadcn/ui components. Deployed serverlessly on Vercel's free tier.
 
 ## Features
 
-- **Intelligent Prompt Optimization**: Automatically enhances prompts with context-specific instructions, output format specifications, and prompt engineering techniques
-- Serverless API (no Express, no long-running servers)
-- Supports OpenAI, Anthropic, and Groq models
-- Cost estimation per model
-- Compression modes: strict, balanced, creative, recommended
-- **Modern, Sleek UI**: Glassmorphism design with dark mode toggle, smooth animations, and responsive layout
-- Vercel-optimized (cold start safe, WASM ready)
+- **Modern React UI**: Built with TypeScript, Tailwind CSS, and shadcn/ui components
+- **Intelligent Prompt Optimization**: Context-aware prompt enhancement with model-specific instructions
+- **Multiple AI Models**: Support for OpenAI, Anthropic, Google, Meta, and Mistral models
+- **Output Formats**: Plain text, JSON, Markdown, and XML output options
+- **Dark Mode**: Built-in theme switching with localStorage persistence
+- **Cost Estimation**: Real-time token and cost calculation
+- **Responsive Design**: Mobile-first design that works on all devices
+- **Serverless API**: Vercel Functions with automatic scaling
+
+## Supported Models
+
+### OpenAI
+- GPT-4 Turbo
+- GPT-3.5 Turbo
+
+### Anthropic
+- Claude 3 Opus
+- Claude 2
+
+### Google
+- Gemini Pro
+- Gemini Ultra
+
+### Meta
+- Llama 3 70B
+
+### Mistral AI
+- Mistral Large
+
+## Tech Stack
+
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Icons**: Lucide React
+- **Backend**: Vercel Serverless Functions
+- **Tokenization**: tiktoken for OpenAI models
+- **Deployment**: Vercel (free tier)
 
 ## Supported Models
 
