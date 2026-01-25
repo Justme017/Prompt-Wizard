@@ -114,7 +114,7 @@ function recommendedMode(prompt) {
 
 /* ---------------- HANDLER ---------------- */
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   console.log('API called with method:', req.method);
   console.log('Request body:', req.body);
 

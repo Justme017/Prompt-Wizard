@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Sparkles, Copy, Check } from "lucide-react";
+import { Sparkles, Copy, Check, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -60,7 +60,19 @@ export const PromptEnhancer = () => {
     } else {
       root.classList.remove("dark");
     }
+    localStorage.setItem("darkMode", isDark.toString());
   }, [isDark]);
+
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode");
+    if (savedDarkMode !== null) {
+      setIsDark(savedDarkMode === "true");
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setIsDark(prefersDark);
+    }
+  }, []);
 
   const inputTokens = useMemo(() => estimateTokens(inputPrompt), [inputPrompt]);
 
@@ -134,7 +146,21 @@ export const PromptEnhancer = () => {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
-          <h1 className="text-4xl font-bold text-center">Prompt Optimizer</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-4xl font-bold">Prompt Optimizer</h1>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setIsDark(!isDark)}
+              className="w-10 h-10"
+            >
+              {isDark ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
+            </Button>
+          </div>
 
           {/* Settings Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
