@@ -4,6 +4,7 @@ A serverless prompt optimization tool for LLMs, designed to run natively on Verc
 
 ## Features
 
+- **Intelligent Prompt Optimization**: Automatically enhances prompts with context-specific instructions, output format specifications, and prompt engineering techniques
 - Serverless API (no Express, no long-running servers)
 - Supports OpenAI, Anthropic, and Groq models
 - Cost estimation per model
