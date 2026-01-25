@@ -1,85 +1,73 @@
-# Prompt Optimizer (Vercel-ready)
+# Welcome to your Lovable project
 
-A serverless prompt optimization tool for LLMs, designed to run natively on Vercel's free tier.
+## Project info
 
-## Features
+**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
-- Serverless API (no Express, no long-running servers)
-- Supports OpenAI (`tiktoken`) and Anthropic (`anthropic-tokenizer`) tokenizers
-- Cost estimation per model
-- Compression modes: strict, balanced, creative, recommended
-- Frontend UI (HTML/JS)
-- Vercel-optimized (cold start safe, WASM ready)
+## How can I edit this code?
 
-## Project Structure
+There are several ways of editing your application.
 
-```
-prompt-optimizer/
-│
-├─ api/
-│   └─ optimize.js        # Serverless API route
-│
-├─ public/
-│   └─ index.html         # Frontend UI
-│
-├─ package.json           # Dependencies
-├─ vercel.json            # (Optional) Function config
-└─ README.md
-```
+**Use Lovable**
 
-## Quick Start
+Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
-1. **Install dependencies**
-   ```bash
-   npm install
-   ```
-2. **Deploy to Vercel**
-   ```bash
-   npm i -g vercel
-   vercel
-   ```
-   - Framework: Other
-   - Output directory: public
-   - Build command: (leave empty)
+Changes made via Lovable will be committed automatically to this repo.
 
-3. **Test locally**
-   - Open `public/index.html` in your browser
-   - Or deploy and open your Vercel URL
+**Use your preferred IDE**
 
-## API Usage
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-POST to `/api/optimize` with JSON body:
-```json
-{
-  "prompt": "Your prompt here",
-  "model": "gpt-4o" | "gpt-4.1" | "claude-3-opus",
-  "mode": "recommended" | "strict" | "balanced" | "creative"
-}
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
 ```
 
-Returns:
-```json
-{
-  "optimized": "...",
-  "tokens": 123,
-  "cost": "0.000123",
-  "modeUsed": "balanced"
-}
-```
+**Edit a file directly in GitHub**
 
-## Notes
-- Do not use `express.listen()` or write to the filesystem.
-- Always use relative API paths in frontend code.
-- Tokenizers are imported inside the API route for Vercel compatibility.
-- See `vercel.json` for function memory/duration tuning.
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-## Next Steps
-- Add per-model system prompt templates
-- Output token estimation
-- Cost cap warnings
-- User auth & quotas
-- Prompt history & diff
+**Use GitHub Codespaces**
 
----
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-Built for Vercel. Fast, serverless, and cost-aware.
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
