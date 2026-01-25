@@ -1,6 +1,9 @@
-const { encoding_for_model } = require("tiktoken");
-
-/* ---------------- MODEL CONFIG ---------------- */
+// Simple token approximation (works reliably in serverless)
+function approximateTokens(text) {
+  if (!text || text.trim().length === 0) return 0;
+  // Rough estimation: ~4 chars per token for English text
+  return Math.ceil(text.trim().length / 4);
+}
 
 const MODELS = {
   // OpenAI
@@ -18,24 +21,6 @@ const MODELS = {
   "mistral": { priceIn: 0.3 / 1e6, provider: "mistral" }
 };
 
-/* ---------------- TOKENIZERS ---------------- */
-
-function openAITokens(text, model) {
-  try {
-    const enc = encoding_for_model(model.startsWith("gpt") ? "gpt-4" : "cl100k_base");
-    const tokens = enc.encode(text).length;
-    enc.free();
-    return tokens;
-  } catch {
-    return text.trim().split(/\s+/).length * 1.3; // approximate
-  }
-}
-
-// Placeholder: approximate for non-OpenAI models
-function approximateTokens(text) {
-  return Math.ceil(text.trim().split(/\s+/).length * 1.3);
-}
-
 /* ---------------- FORMATTING ---------------- */
 
 function formatAsMarkdown(text) {
@@ -48,55 +33,32 @@ function formatAsJSON(text) {
   return JSON.stringify({
     optimizedPrompt: text,
     timestamp: new Date().toISOString(),
-    generator: "Prompt Optimizer"
-  }, null, 2);
+    generatedBy: "Prompt Optimizer"
+  });
 }
 
 function formatAsYAML(text) {
-  // Convert to YAML format
-  return `optimizedPrompt: "${text.replace(/"/g, '\\"')}"\ntimestamp: ${new Date().toISOString()}\ngenerator: Prompt Optimizer`;
+  // Simple YAML format
+  return `optimizedPrompt: "${text.replace(/"/g, '\\"')}"\ntimestamp: ${new Date().toISOString()}\ngeneratedBy: Prompt Optimizer`;
 }
 
 /* ---------------- COMPRESSION ---------------- */
 
-function compress(prompt, mode, format = "plain") {
-  let optimized = prompt
-    // Basic cleanup
-    .replace(/\s+/g, " ")
-    .replace(/\n+/g, " ")
-    .trim();
+function compress(prompt, mode, format) {
+  let optimized = prompt.trim();
 
-  // Remove common filler words and phrases
-  const fillers = /\b(please|kindly|very|really|so|just|actually|basically|essentially|literally|honestly|truly|absolutely|completely|totally|extremely|quite|rather|somewhat|fairly|pretty|really)\b/gi;
-  optimized = optimized.replace(fillers, "");
-
-  // Remove redundant phrases
-  optimized = optimized.replace(/\b(i want you to|i need you to|i would like you to)\b/gi, "");
-  optimized = optimized.replace(/\b(can you please|could you please)\b/gi, "");
-  optimized = optimized.replace(/\b(make sure to|be sure to|remember to)\b/gi, "");
-
-  // Shorten common constructions
-  optimized = optimized.replace(/\b(do not|don't)\b/gi, "avoid");
-  optimized = optimized.replace(/\b(it is|it's)\b/gi, "is");
-  optimized = optimized.replace(/\b(there is|there's)\b/gi, "is");
-  optimized = optimized.replace(/\b(there are|there're)\b/gi, "are");
-
-  // Clean up extra spaces again
-  optimized = optimized.replace(/\s+/g, " ").trim();
-
-  // Apply intelligent prompt engineering based on content
+  // Basic optimizations
   const lowerPrompt = optimized.toLowerCase();
 
+  // Add context based on prompt type
   if (lowerPrompt.includes("code") || lowerPrompt.includes("program") || lowerPrompt.includes("function")) {
     optimized = `Write clean, efficient, well-commented code. Include error handling: ${optimized}`;
-  } else if (lowerPrompt.includes("explain") || lowerPrompt.includes("describe")) {
-    optimized = `Explain step-by-step with examples and clear reasoning: ${optimized}`;
-  } else if (lowerPrompt.includes("analyze") || lowerPrompt.includes("review")) {
-    optimized = `Provide detailed analysis with evidence, pros/cons, and recommendations: ${optimized}`;
-  } else if (lowerPrompt.includes("summarize") || lowerPrompt.includes("summary")) {
-    optimized = `Create concise summary with key points, main ideas, and conclusions: ${optimized}`;
   } else if (lowerPrompt.includes("write") || lowerPrompt.includes("create") || lowerPrompt.includes("generate")) {
-    optimized = `Write original, engaging, well-structured content with clear introduction and conclusion: ${optimized}`;
+    optimized = `Write comprehensive, well-structured content: ${optimized}`;
+  } else if (lowerPrompt.includes("explain") || lowerPrompt.includes("describe")) {
+    optimized = `Provide clear, detailed explanation: ${optimized}`;
+  } else if (lowerPrompt.includes("analyze") || lowerPrompt.includes("review")) {
+    optimized = `Provide thorough analysis with specific examples: ${optimized}`;
   } else if (lowerPrompt.includes("question") || lowerPrompt.includes("answer")) {
     optimized = `Provide comprehensive answer with reasoning and supporting evidence: ${optimized}`;
   } else if (lowerPrompt.includes("list") || lowerPrompt.includes("steps")) {
@@ -153,32 +115,43 @@ function recommendedMode(prompt) {
 /* ---------------- HANDLER ---------------- */
 
 module.exports = async function handler(req, res) {
+  console.log('API called with method:', req.method);
+  console.log('Request body:', req.body);
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "POST only" });
   }
 
   const { prompt, model, mode, format = "plain" } = req.body;
 
-  const finalMode =
-    mode === "recommended" ? recommendedMode(prompt) : mode;
-
-  const optimized = compress(prompt, finalMode, format);
-
-  let tokens;
-  const provider = MODELS[model]?.provider;
-  if (provider === "openai") {
-    tokens = openAITokens(optimized, model);
-  } else {
-    tokens = approximateTokens(optimized);
+  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+    return res.status(400).json({ error: "Valid prompt is required" });
   }
 
-  const cost = tokens * (MODELS[model]?.priceIn || 0);
+  if (!model || !MODELS[model]) {
+    return res.status(400).json({ error: "Valid model is required" });
+  }
 
-  res.status(200).json({
-    optimized,
-    tokens,
-    cost: cost.toFixed(6),
-    modeUsed: finalMode,
-    format
-  });
+  const finalMode = mode === "recommended" ? recommendedMode(prompt) : mode;
+
+  if (!["strict", "balanced", "creative"].includes(finalMode)) {
+    return res.status(400).json({ error: "Invalid mode" });
+  }
+
+  try {
+    const optimized = compress(prompt, finalMode, format);
+    const tokens = approximateTokens(optimized);
+    const cost = tokens * (MODELS[model]?.priceIn || 0);
+
+    res.status(200).json({
+      optimized,
+      tokens,
+      cost: cost.toFixed(6),
+      modeUsed: finalMode,
+      format
+    });
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
