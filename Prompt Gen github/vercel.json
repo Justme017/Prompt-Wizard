@@ -1,9 +1,11 @@
 {
-  "framework": "vite",
+  "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "installCommand": "npm install",
   "functions": {
     "api/*.js": {
+      "runtime": "nodejs18.x",
       "memory": 1024,
       "maxDuration": 10
     }
