@@ -9,7 +9,7 @@ A serverless prompt optimization tool for LLMs, designed to run natively on Verc
 - Supports OpenAI, Anthropic, and Groq models
 - Cost estimation per model
 - Compression modes: strict, balanced, creative, recommended
-- Beautiful, responsive frontend UI
+- **Modern, Sleek UI**: Glassmorphism design with dark mode toggle, smooth animations, and responsive layout
 - Vercel-optimized (cold start safe, WASM ready)
 
 ## Supported Models

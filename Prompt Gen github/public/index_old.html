@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Optimizer</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1.5rem;
+      font-weight: 300;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+      font-weight: 500;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 1rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 1rem;
+      resize: vertical;
+      transition: border-color 0.3s;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: white;
+      transition: border-color 0.3s;
+    }
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .result {
+      margin-top: 2rem;
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 10px;
+      border-left: 5px solid #667eea;
+      display: none;
+    }
+    .result h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .metric strong {
+      color: #667eea;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      color: #667eea;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Prompt Optimizer</h1>
+    <form id="optimizer-form">
+      <div class="form-group">
+        <label for="prompt">Your Prompt:</label>
+        <textarea id="prompt" required placeholder="Enter your prompt here..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="model">Model:</label>
+        <select id="model">
+          <optgroup label="OpenAI">
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
+            <option value="gpt-4.1">GPT-4.1</option>
+          </optgroup>
+          <optgroup label="Anthropic">
+            <option value="claude-3-opus">Claude 3 Opus</option>
+            <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+            <option value="claude-3-haiku">Claude 3 Haiku</option>
+          </optgroup>
+          <optgroup label="Groq">
+            <option value="llama3-8b-8192">Llama 3 8B</option>
+            <option value="llama3-70b-8192">Llama 3 70B</option>
+            <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+            <option value="gemma-7b-it">Gemma 7B</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="mode">Optimization Mode:</label>
+        <select id="mode">
+          <option value="recommended">Recommended</option>
+          <option value="strict">Strict</option>
+          <option value="balanced">Balanced</option>
+          <option value="creative">Creative</option>
+        </select>
+      </div>
+      <button type="submit">Optimize Prompt</button>
+    </form>
+    <div class="loading" id="loading">Optimizing... 🚀</div>
+    <div class="result" id="result">
+      <h3>Optimized Result</h3>
+      <div id="optimized-text"></div>
+      <div class="metric"><span>Tokens:</span> <strong id="tokens"></strong></div>
+      <div class="metric"><span>Cost:</span> <strong id="cost"></strong></div>
+      <div class="metric"><span>Mode:</span> <strong id="mode-used"></strong></div>
+    </div>
+  </div>
+  <script>
+    document.getElementById('optimizer-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const prompt = document.getElementById('prompt').value;
+      const model = document.getElementById('model').value;
+      const mode = document.getElementById('mode').value;
+
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('result').style.display = 'none';
+
+      try {
+        const res = await fetch('/api/optimize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, model, mode })
+        });
+        const data = await res.json();
+
+        document.getElementById('optimized-text').textContent = data.optimized;
+        document.getElementById('tokens').textContent = data.tokens;
+        document.getElementById('cost').textContent = `$${data.cost}`;
+        document.getElementById('mode-used').textContent = data.modeUsed;
+
+        document.getElementById('result').style.display = 'block';
+      } catch (error) {
+        alert('Error optimizing prompt. Please try again.');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    };
+  </script>
+</body>
+</html>
