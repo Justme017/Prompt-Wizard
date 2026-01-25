@@ -1,4 +1,4 @@
-import { encoding_for_model } from "tiktoken";
+const { encoding_for_model } = require("tiktoken");
 
 /* ---------------- MODEL CONFIG ---------------- */
 
@@ -152,7 +152,7 @@ function recommendedMode(prompt) {
 
 /* ---------------- HANDLER ---------------- */
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "POST only" });
   }
