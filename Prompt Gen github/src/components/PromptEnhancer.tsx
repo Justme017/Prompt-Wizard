@@ -98,6 +98,8 @@ export const PromptEnhancer = () => {
   const [copied, setCopied] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [tokens, setTokens] = useState(0);
+  const [cost, setCost] = useState(0);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -109,9 +111,8 @@ export const PromptEnhancer = () => {
   }, [isDark]);
 
   const inputTokens = useMemo(() => estimateTokens(inputPrompt), [inputPrompt]);
-  const outputTokens = useMemo(() => estimateTokens(outputPrompt), [outputPrompt]);
 
-  const handleEnhance = () => {
+  const handleEnhance = async () => {
     if (!inputPrompt.trim()) {
       toast({
         title: "Empty prompt",
@@ -122,18 +123,44 @@ export const PromptEnhancer = () => {
     }
 
     setIsEnhancing(true);
-    
-    // Simulate processing delay
-    setTimeout(() => {
-      const enhanced = enhancePrompt(inputPrompt, mode, format, model);
-      setOutputPrompt(enhanced);
-      setIsEnhancing(false);
-      
+
+    try {
+      const response = await fetch('/api/optimize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: inputPrompt,
+          model: model,
+          mode: mode,
+          format: format,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to enhance prompt');
+      }
+
+      const data = await response.json();
+      setOutputPrompt(data.optimized);
+      setTokens(data.tokens);
+      setCost(parseFloat(data.cost));
+
       toast({
         title: "Prompt enhanced!",
         description: `Optimized for ${AI_MODELS.find(m => m.value === model)?.label}`,
       });
-    }, 500);
+    } catch (error) {
+      console.error('Error enhancing prompt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to enhance prompt. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
   };
 
   const handleCopy = async () => {
@@ -291,10 +318,18 @@ export const PromptEnhancer = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">Enhanced Prompt</h2>
               <div className="flex items-center gap-3">
-                <span className="token-badge">
-                  <span className="w-2 h-2 rounded-full bg-primary"></span>
-                  {outputTokens.toLocaleString()} tokens
-                </span>
+                {outputPrompt && (
+                  <>
+                    <span className="token-badge">
+                      <span className="w-2 h-2 rounded-full bg-primary"></span>
+                      {tokens.toLocaleString()} tokens
+                    </span>
+                    <span className="cost-badge">
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                      ${cost.toFixed(6)}
+                    </span>
+                  </>
+                )}
                 {outputPrompt && (
                   <Button
                     variant="ghost"
