@@ -1,0 +1,8 @@
+{
+  "name": "prompt-optimizer",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "tiktoken": "^1.0.10"
+  }
+}
