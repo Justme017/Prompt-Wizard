@@ -1,73 +1,121 @@
-# Welcome to your Lovable project
+# Prompt Wizard
 
-## Project info
+A modern, AI-powered prompt optimization tool that helps you craft better prompts for various AI models. Enhance your prompts with different modes (strict, balanced, creative) and output formats.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## ✨ Features
 
-## How can I edit this code?
+- **Multiple AI Models**: Support for GPT-4, GPT-3.5, Claude 3, Claude 2, Gemini Pro, Gemini Ultra, Llama 3, and Mistral Large
+- **Optimization Modes**: Choose from strict, balanced, or creative optimization styles
+- **Output Formats**: Generate prompts in plain text, JSON, Markdown, or XML formats
+- **Dark Mode**: Toggle between light and dark themes with system preference detection
+- **Real-time Token Counting**: See token usage and cost estimates
+- **Copy to Clipboard**: Easily copy enhanced prompts
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
-There are several ways of editing your application.
+## 🚀 Live Demo
 
-**Use Lovable**
+Visit the live application: [https://prompt-wizard-seven.vercel.app](https://prompt-wizard-seven.vercel.app)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🛠️ Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **Deployment**: Vercel with serverless functions
+- **Icons**: Lucide React
+- **Notifications**: Sonner for toast messages
 
-**Use your preferred IDE**
+## 📦 Installation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd prompt-wizard
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Follow these steps:
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+4. **Open your browser**
+   Navigate to `http://localhost:5173`
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🏗️ Build for Production
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+## 🚀 Deployment
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The app is configured for deployment on Vercel:
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+npx vercel --prod
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📁 Project Structure
 
-## What technologies are used for this project?
+```
+src/
+├── components/
+│   ├── ui/           # Reusable UI components (shadcn/ui)
+│   └── PromptEnhancer.tsx  # Main application component
+├── hooks/            # Custom React hooks
+├── lib/              # Utility functions
+└── main.tsx          # Application entry point
 
-This project is built with:
+api/
+└── optimize.js       # Serverless function for prompt optimization
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+public/               # Static assets
+```
 
-## How can I deploy this project?
+## 🎨 Customization
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Adding New AI Models
 
-## Can I connect a custom domain to my Lovable project?
+Edit the `AI_MODELS` array in `src/components/PromptEnhancer.tsx`:
 
-Yes, you can!
+```typescript
+const AI_MODELS: { value: AIModel; label: string; provider: string }[] = [
+  // Add your new model here
+  { value: "your-model", label: "Your Model Name", provider: "Provider Name" },
+];
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Modifying Optimization Logic
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+The API endpoint in `api/optimize.js` handles the prompt optimization. You can modify the logic there to integrate with different AI services or adjust the optimization algorithms.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
+
+## 👨‍💻 Author
+
+**Shubham Mehta**
+
+Made with ❤️ by Shubham Mehta
+
+## 🙏 Acknowledgments
+
+- [shadcn/ui](https://ui.shadcn.com/) for the beautiful component library
+- [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
+- [Vercel](https://vercel.com/) for the amazing deployment platform
+- [Lucide](https://lucide.dev/) for the beautiful icons

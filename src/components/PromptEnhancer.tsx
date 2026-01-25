@@ -147,7 +147,7 @@ export const PromptEnhancer = () => {
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-4xl font-bold">Prompt Optimizer</h1>
+            <h1 className="text-4xl font-bold">Prompt Wizard</h1>
             <Button
               variant="outline"
               size="icon"
@@ -283,6 +283,18 @@ export const PromptEnhancer = () => {
               />
             </div>
           )}
+          
+          {/* Footer */}
+          <footer className="mt-16 pt-8 border-t border-border">
+            <div className="text-center space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Made with ❤️ by Shubham Mehta
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Licensed under Creative Commons (CC) Attribution-ShareAlike 4.0 International
+              </p>
+            </div>
+          </footer>
         </div>
       </div>
     );
@@ -292,7 +304,7 @@ export const PromptEnhancer = () => {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
-          <h1 className="text-4xl font-bold text-center text-red-500">Error Loading Component</h1>
+          <h1 className="text-4xl font-bold text-center text-red-500">Error Loading Prompt Wizard</h1>
           <p className="text-center">Check console for details.</p>
           <pre className="bg-red-50 p-4 rounded text-sm overflow-auto">
             {error instanceof Error ? error.message : String(error)}
