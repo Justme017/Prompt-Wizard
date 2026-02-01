@@ -2,11 +2,46 @@
   <img src="public/1769975609060.png" alt="Prompt Wizard Banner" width="100%">
 </p>
 
-# Prompt Wizard
+<h1 align="center">Prompt Wizard</h1>
 
-### Advanced Prompt Generator
+<p align="center">
+  <strong>Advanced AI-Powered Prompt Generator</strong>
+</p>
 
-A modern, AI-powered prompt optimization tool that helps you craft better prompts for various AI models. Features both free rule-based generation and AI-powered enhancement with support for multiple models and output formats.
+<p align="center">
+  <a href="https://prompt-wizard-seven.vercel.app">
+    <img src="https://img.shields.io/badge/Live%20Demo-Visit%20Now-blue?style=for-the-badge&logo=vercel" alt="Live Demo">
+  </a>
+  <a href="https://github.com/Justme017/Prompt-Wizard/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg?style=for-the-badge" alt="License">
+  </a>
+  <a href="https://github.com/Justme017/Prompt-Wizard/stargazers">
+    <img src="https://img.shields.io/github/stars/Justme017/Prompt-Wizard?style=for-the-badge&logo=github" alt="GitHub stars">
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React">
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/Tailwind-3-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind">
+  <img src="https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel">
+</p>
+
+<p align="center">
+  A modern, AI-powered prompt optimization tool that helps you craft better prompts for various AI models. Features both free rule-based generation and AI-powered enhancement with support for multiple models and output formats.
+</p>
+
+<p align="center">
+  <a href="#-features">Features</a> •
+  <a href="#-live-demo">Demo</a> •
+  <a href="#-installation">Installation</a> •
+  <a href="#-usage">Usage</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-contributing">Contributing</a>
+</p>
+
+---
 
 ## ✨ Features
 
@@ -22,7 +57,27 @@ A modern, AI-powered prompt optimization tool that helps you craft better prompt
 
 ## 🚀 Live Demo
 
-Visit the live application: [https://prompt-wizard-seven.vercel.app](https://prompt-wizard-seven.vercel.app)
+**Try it now:** [https://prompt-wizard-seven.vercel.app](https://prompt-wizard-seven.vercel.app)
+
+![Demo](https://img.shields.io/badge/Status-Online-success?style=flat-square)
+
+---
+
+## 📚 Table of Contents
+
+- [Features](#-features)
+- [Live Demo](#-live-demo)
+- [Tech Stack](#️-tech-stack)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Generation Modes](#-generation-modes)
+- [Project Structure](#-project-structure)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Author](#-author)
+
+---
 
 ## 🛠️ Tech Stack
 
@@ -35,10 +90,18 @@ Visit the live application: [https://prompt-wizard-seven.vercel.app](https://pro
 
 ## 📦 Installation
 
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Git
+
+### Setup
+
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Justme017/Prompt-Wizard
-   cd advanced-prompt-generator
+   git clone https://github.com/Justme017/Prompt-Wizard.git
+   cd Prompt-Wizard
    ```
 
 2. **Install dependencies**
@@ -52,7 +115,45 @@ Visit the live application: [https://prompt-wizard-seven.vercel.app](https://pro
    ```
 
 4. **Open your browser**
+   
    Navigate to `http://localhost:5173`
+
+---
+
+## 💡 Usage
+
+### Free Rule-Based Mode
+
+1. Enter your prompt in the text area
+2. Select your desired output format (Plain Text, JSON, Markdown, Code)
+3. Click "Generate Enhanced Prompt"
+4. Copy the enhanced prompt to use with any AI model
+
+### AI-Powered Mode
+
+1. Get your free API key from [OpenRouter](https://openrouter.ai/keys)
+2. Enter the API key in the configuration section
+3. Toggle to "AI-Powered Mode"
+4. Select your preferred AI model (GPT-4o, Claude 3.5, Gemini Pro, etc.)
+5. Enter your prompt and generate
+
+### Skills Quick-Start
+
+Use the "Add Skill to Chat" dropdown to instantly copy pre-configured prompts for:
+- 🎨 Image Generation
+- 🎵 Audio Generation  
+- 🎬 Video Generation
+- ✉️ Email Writing
+- 🔍 Research
+- 👶 ELI5 Explanations
+- 📊 Data Analysis
+- 💻 Code Review
+- 🌐 Translation
+- ✍️ Creative Writing
+- 📚 Tutoring
+- 📝 Summarization
+
+---
 
 ## 🏗️ Build for Production
 
@@ -62,12 +163,25 @@ npm run build
 
 ## 🚀 Deployment
 
-The app is configured for deployment on Vercel:
+### Deploy to Vercel (Recommended)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Justme017/Prompt-Wizard)
+
+**Manual Deployment:**
 
 ```bash
+# Build the project
 npm run build
+
+# Deploy to Vercel
 npx vercel --prod
 ```
+
+### Environment Variables
+
+No environment variables required for the free mode. For AI-powered mode, users provide their own OpenRouter API keys directly in the UI.
+
+---
 
 ## 📁 Project Structure
 
@@ -89,54 +203,118 @@ public/                            # Static assets
 
 ### Generation Modes
 
-1. **Free Rule-Based Mode** (⚡)
-   - Instant generation with no API costs
-   - Smart intent analysis and context-aware prompt structuring
-   - Optimized for different content types (writing, coding, analysis, etc.)
+#### ⚡ Free Rule-Based Mode
+- ✅ Instant generation with no API costs
+- ✅ Smart intent analysis and context-aware prompt structuring
+- ✅ Optimized for different content types (writing, coding, analysis, etc.)
+- ✅ No sign-up required
 
-2. **AI-Powered Mode** (🤖)
-   - Uses OpenRouter API for intelligent prompt enhancement
-   - Requires API key from [openrouter.ai](https://openrouter.ai/keys)
-   - Advanced prompt engineering with AI assistance
-   - Supports multiple AI models including GPT-4o, Claude 3.5, Gemini Pro, and more
+#### 🤖 AI-Powered Mode
+- 🚀 Uses OpenRouter API for intelligent prompt enhancement
+- 🔑 Requires API key from [openrouter.ai](https://openrouter.ai/keys)
+- 🧠 Advanced prompt engineering with AI assistance
+- 🎯 Supports multiple AI models:
+  - **OpenAI**: GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo
+  - **Anthropic**: Claude 3.5 Sonnet
+  - **Google**: Gemini Pro, Gemma 3 12B (default)
 
-### Intent Analysis
+### 🎯 Smart Intent Detection
 
 The tool automatically analyzes your prompt to determine the intent:
-- **Creative Writing**: Stories, articles, narratives
-- **Coding**: Scripts, programs, algorithms
-- **Analytical**: Research, evaluation, comparison
-- **Data Science**: Visualization, plotting, analysis
-- **General**: All other types of prompts
 
-### Model Optimization
+| Intent | Description | Examples |
+|--------|-------------|----------|
+| 🎨 **Creative Writing** | Stories, articles, narratives | "Write a sci-fi story" |
+| 💻 **Coding** | Scripts, programs, algorithms | "Create a Python script" |
+| 📊 **Analytical** | Research, evaluation, comparison | "Analyze market trends" |
+| 📈 **Data Science** | Visualization, plotting, analysis | "Create a data dashboard" |
+| 🌐 **General** | All other types of prompts | "Explain quantum physics" |
 
-Each AI model gets tailored optimization:
-- **OpenAI Models**: Clear structure, logical flow, concrete examples
-- **Anthropic Models**: Step-by-step reasoning, structured thinking
-- **Google Models**: Research-backed information, clear queries
+### ⚙️ Output Formats
+
+Choose from multiple output formats for your enhanced prompts:
+- 📝 **Plain Text**: Simple, readable format
+- 🔗 **JSON**: Structured data format
+- 📄 **Markdown**: Formatted documentation
+- 💻 **Code**: Programming-specific format
+
+---
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+### How to Contribute
+
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. ✍️ Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. 📤 Push to the branch (`git push origin feature/AmazingFeature`)
+5. 🎉 Open a Pull Request
+
+### Development Guidelines
+
+- Follow the existing code style
+- Write clear commit messages
+- Update documentation as needed
+- Test your changes thoroughly
+
+---
 
 ## 📄 License
 
-This project is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
+This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0 International License**.
+
+[![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
+
+You are free to:
+- ✅ Share — copy and redistribute the material
+- ✅ Adapt — remix, transform, and build upon the material
+
+Under the following terms:
+- 📝 Attribution — Give appropriate credit
+- 🔄 ShareAlike — Distribute under the same license
+
+---
 
 ## 👨‍💻 Author
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Made%20with-❤️-red?style=for-the-badge" alt="Made with love">
+</p>
+
 **Shubham Mehta**
 
-Made with ❤️ by Shubham Mehta
+[![GitHub](https://img.shields.io/badge/GitHub-Justme017-181717?style=flat-square&logo=github)](https://github.com/Justme017)
+
+---
 
 ## 🙏 Acknowledgments
 
-- [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
-- [Vercel](https://vercel.com/) for the amazing deployment platform
-- [Lucide](https://lucide.dev/) for the beautiful icons
-- [OpenRouter](https://openrouter.ai/) for the AI integration
+Special thanks to:
+
+- 🎨 [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- ⚡ [Vite](https://vitejs.dev/) - Next generation frontend tooling
+- ⚛️ [React](https://react.dev/) - JavaScript library for building user interfaces
+- 🚀 [Vercel](https://vercel.com/) - Deployment and hosting platform
+- 🎭 [Lucide](https://lucide.dev/) - Beautiful & consistent icons
+- 🤖 [OpenRouter](https://openrouter.ai/) - Unified API for multiple AI models
+
+---
+
+## 📊 Stats
+
+![GitHub repo size](https://img.shields.io/github/repo-size/Justme017/Prompt-Wizard?style=flat-square)
+![GitHub language count](https://img.shields.io/github/languages/count/Justme017/Prompt-Wizard?style=flat-square)
+![GitHub top language](https://img.shields.io/github/languages/top/Justme017/Prompt-Wizard?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/Justme017/Prompt-Wizard?style=flat-square)
+
+---
+
+<p align="center">
+  <strong>⭐ If you find this project useful, please consider giving it a star! ⭐</strong>
+</p>
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/Justme017">Shubham Mehta</a>
+</p>
