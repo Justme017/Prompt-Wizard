@@ -109,7 +109,10 @@ const generateAIPrompt = async (input, modelId, formatId, apiKey) => {
 };
 
 export default function AdvancedPromptGenerator() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -123,6 +126,10 @@ export default function AdvancedPromptGenerator() {
   const [error, setError] = useState('');
   const [selectedSkill, setSelectedSkill] = useState('');
   const [skillCopied, setSkillCopied] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+  }, [darkMode]);
 
   useEffect(() => {
     setInputTokens(Math.ceil(input.split(/\s+/).filter(w => w).length * 1.3));
@@ -177,7 +184,7 @@ export default function AdvancedPromptGenerator() {
     }
   };
 
-  const bg = darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50';
+  const bg = darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-cyan-50 via-teal-50 to-blue-50';
   const card = darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
   const text = darkMode ? 'text-gray-100' : 'text-gray-800';
   const textSec = darkMode ? 'text-gray-400' : 'text-gray-600';
@@ -188,8 +195,8 @@ export default function AdvancedPromptGenerator() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl shadow-lg">
-              <Brain className="w-6 md:w-8 h-6 md:h-8 text-white" />
+            <div>
+              <img src="/favicon.ico" alt="Prompt Wizard Logo" className="w-12 md:w-16 h-12 md:h-16" />
             </div>
             <div>
               <h1 className={`text-2xl md:text-4xl font-bold ${text}`}>Prompt Wizard</h1>
@@ -206,15 +213,15 @@ export default function AdvancedPromptGenerator() {
         <div className="grid md:grid-cols-2 gap-6">
           <div className={`${card} border rounded-xl shadow-lg p-6`}>
             <div className="flex items-center gap-2 mb-4">
-              <Settings className="w-5 h-5 text-purple-600" />
+              <Settings className="w-5 h-5 text-teal-600" />
               <h2 className={`text-lg font-semibold ${text}`}>Configuration</h2>
             </div>
 
             <div className="space-y-4">
-              <div className={`p-3 rounded-lg ${useAPI ? 'bg-blue-50 dark:bg-blue-900' : 'bg-green-50 dark:bg-green-900'} border-2 ${useAPI ? 'border-blue-200 dark:border-blue-700' : 'border-green-200 dark:border-green-700'}`}>
+              <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-teal-50'} border-2 ${darkMode ? 'border-teal-500' : 'border-teal-200'}`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    {useAPI ? <Zap className="w-5 h-5 text-blue-600" /> : <Unlock className="w-5 h-5 text-green-600" />}
+                    {useAPI ? <Zap className={`w-5 h-5 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} /> : <Unlock className={`w-5 h-5 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />}
                     <span className={`font-semibold text-sm ${text}`}>
                       {useAPI ? 'AI-Powered Mode' : 'Free Mode'}
                     </span>
@@ -240,28 +247,28 @@ export default function AdvancedPromptGenerator() {
               {useAPI && (
                 <div>
                   <label className={`block text-sm font-medium ${text} mb-2`}>
-                    OpenRouter API Key <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline text-xs">(Get free key)</a>
+                    OpenRouter API Key <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline text-xs">(Get free key)</a>
                   </label>
                   <input
                     type="password"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     placeholder="Enter your API key"
-                    className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 text-sm`}
+                    className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-teal-500 text-sm`}
                   />
                 </div>
               )}
 
               <div>
                 <label className={`block text-sm font-medium ${text} mb-2`}>Target AI Model</label>
-                <select value={model} onChange={(e) => setModel(e.target.value)} className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 text-sm`}>
+                <select value={model} onChange={(e) => setModel(e.target.value)} className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-teal-500 text-sm`}>
                   {AI_MODELS.map(m => <option key={m.id} value={m.id}>{m.name} ({m.provider})</option>)}
                 </select>
               </div>
 
               <div>
                 <label className={`block text-sm font-medium ${text} mb-2`}>Output Format</label>
-                <select value={format} onChange={(e) => setFormat(e.target.value)} className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 text-sm`}>
+                <select value={format} onChange={(e) => setFormat(e.target.value)} className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-teal-500 text-sm`}>
                   {OUTPUT_FORMATS.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
                 </select>
               </div>
@@ -274,7 +281,7 @@ export default function AdvancedPromptGenerator() {
                   <select 
                     value={selectedSkill} 
                     onChange={(e) => setSelectedSkill(e.target.value)} 
-                    className={`flex-1 p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 text-sm`}
+                    className={`flex-1 p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-teal-500 text-sm`}
                   >
                     <option value="">Select a skill...</option>
                     {SKILL_TEMPLATES.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -284,7 +291,7 @@ export default function AdvancedPromptGenerator() {
                     disabled={!selectedSkill}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                       selectedSkill
-                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                        ? 'bg-teal-600 text-white hover:bg-teal-700'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
@@ -292,7 +299,7 @@ export default function AdvancedPromptGenerator() {
                   </button>
                 </div>
                 {selectedSkill && (
-                  <div className={`mt-2 p-3 rounded-lg ${darkMode ? 'bg-gray-900 border-purple-500' : 'bg-purple-50 border-purple-200'} border text-xs ${text}`}>
+                  <div className={`mt-2 p-3 rounded-lg ${darkMode ? 'bg-gray-900 border-teal-500' : 'bg-teal-50 border-teal-200'} border text-xs ${text}`}>
                     {SKILL_TEMPLATES.find(s => s.id === selectedSkill)?.skill}
                   </div>
                 )}
@@ -307,7 +314,7 @@ export default function AdvancedPromptGenerator() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="e.g., 'create a story about apple' or 'write a python script to plot fibonacci spiral'"
-                  className={`w-full h-48 p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 resize-none text-sm`}
+                  className={`w-full h-48 p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-teal-500 resize-none text-sm`}
                 />
               </div>
 
@@ -320,7 +327,7 @@ export default function AdvancedPromptGenerator() {
               <button
                 onClick={generate}
                 disabled={loading || !input.trim()}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-400 transition-all flex items-center justify-center gap-2 shadow-lg"
+                className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-3 rounded-lg font-medium hover:from-teal-700 hover:to-cyan-700 disabled:from-gray-400 disabled:to-gray-400 transition-all flex items-center justify-center gap-2 shadow-lg"
               >
                 {loading ? (
                   <><Loader2 className="w-5 h-5 animate-spin" />Generating...</>
@@ -336,17 +343,17 @@ export default function AdvancedPromptGenerator() {
               <h2 className={`text-lg font-semibold ${text}`}>Enhanced Output</h2>
               {output && (
                 <div className="flex items-center gap-3">
-                  <span className={`text-xs ${textSec} bg-purple-100 dark:bg-purple-900 px-2 py-1 rounded`}>
+                  <span className={`text-xs ${textSec} bg-teal-100 dark:bg-teal-900 px-2 py-1 rounded`}>
                     ~{outputTokens} tokens
                   </span>
-                  <button onClick={copy} className="text-sm text-purple-600 hover:text-purple-700 flex items-center gap-1 px-3 py-1 rounded bg-purple-50 dark:bg-purple-900">
+                  <button onClick={copy} className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1 px-3 py-1 rounded bg-teal-50 dark:bg-teal-900">
                     {copied ? <><Check className="w-4 h-4" />Copied!</> : <><Copy className="w-4 h-4" />Copy</>}
                   </button>
                 </div>
               )}
             </div>
 
-            <div className={`${darkMode ? 'bg-gray-900 border-purple-500' : 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200'} p-4 rounded-lg border-2 h-96 overflow-y-auto`}>
+            <div className={`${darkMode ? 'bg-gray-900 border-teal-500' : 'bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-200'} p-4 rounded-lg border-2 h-96 overflow-y-auto`}>
               {output ? (
                 <pre className={`${text} whitespace-pre-wrap text-xs md:text-sm font-mono leading-relaxed`}>{output}</pre>
               ) : (
@@ -368,9 +375,9 @@ export default function AdvancedPromptGenerator() {
               href="https://github.com/Justme017/Prompt-Wizard"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg transition-colors shadow-md hover:shadow-lg"
+              className="group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105 transform"
             >
-              <Star className="w-4 h-4" />
+              <Star className="w-4 h-4 group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300" />
               <span className="text-sm font-medium">Give a Star for Prompt Wizard!</span>
             </a>
           </div>
