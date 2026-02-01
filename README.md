@@ -311,6 +311,28 @@ Special thanks to:
 
 ---
 
+## ⚙️ Repository Setup
+
+### About Section
+To complete your GitHub repository setup, update the **About** section with:
+
+**Description:**
+```
+Advanced AI-powered prompt generator with hybrid modes, multiple AI models, and smart intent detection. Built with React, TypeScript, and Tailwind CSS.
+```
+
+**Website:**
+```
+https://prompt-wizard-seven.vercel.app
+```
+
+**Topics:**
+```
+ai, prompt-engineering, openrouter, react, typescript, vite, tailwind-css, prompt-generator, llm, gpt-4, claude, gemini, ai-tools, prompt-optimization, vercel, openai, anthropic, google-ai, developer-tools, productivity
+```
+
+---
+
 <p align="center">
   <strong>⭐ If you find this project useful, please consider giving it a star! ⭐</strong>
 </p>
