@@ -1,316 +1,465 @@
-import { useState, useMemo, useEffect } from "react";
-import { Sparkles, Copy, Check, Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast";
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Loader2, Copy, Check, Moon, Sun, Settings, Brain, Zap, Lock, Unlock, Star } from 'lucide-react';
 
-type Mode = "strict" | "balanced" | "creative";
-type OutputFormat = "plain" | "json" | "markdown" | "xml";
-type AIModel = "gpt-4" | "gpt-3.5" | "claude-3" | "claude-2" | "gemini-pro" | "gemini-ultra" | "llama-3" | "mistral";
-
-const AI_MODELS: { value: AIModel; label: string; provider: string }[] = [
-  { value: "gpt-4", label: "GPT-4 Turbo", provider: "OpenAI" },
-  { value: "gpt-3.5", label: "GPT-3.5 Turbo", provider: "OpenAI" },
-  { value: "claude-3", label: "Claude 3 Opus", provider: "Anthropic" },
-  { value: "claude-2", label: "Claude 2", provider: "Anthropic" },
-  { value: "gemini-pro", label: "Gemini Pro", provider: "Google" },
-  { value: "gemini-ultra", label: "Gemini Ultra", provider: "Google" },
-  { value: "llama-3", label: "Llama 3 70B", provider: "Meta" },
-  { value: "mistral", label: "Mistral Large", provider: "Mistral AI" },
+const AI_MODELS = [
+  { id: 'gemma-3-12b', name: 'Gemma 3 12B', provider: 'Google', apiModel: 'google/gemma-3-12b-it' },
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', apiModel: 'gpt-4o' },
+  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'OpenAI', apiModel: 'gpt-4-turbo' },
+  { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', apiModel: 'claude-3-5-sonnet-20241022' },
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', provider: 'OpenAI', apiModel: 'gpt-3.5-turbo' },
+  { id: 'gemini-pro', name: 'Gemini Pro', provider: 'Google', apiModel: 'gemini-pro' },
 ];
 
-const OUTPUT_FORMATS: { value: OutputFormat; label: string }[] = [
-  { value: "plain", label: "Plain Text" },
-  { value: "json", label: "JSON" },
-  { value: "markdown", label: "Markdown" },
-  { value: "xml", label: "XML" },
+const SKILL_TEMPLATES = [
+  { id: 'image-gen', name: '🎨 Image Generation', skill: 'Image Generation: Create detailed, high-quality images based on text descriptions using AI image generation models.' },
+  { id: 'audio-gen', name: '🎵 Audio Generation', skill: 'Audio Generation: Generate music, sound effects, or voice synthesis based on textual descriptions.' },
+  { id: 'video-gen', name: '🎬 Video Generation', skill: 'Video Generation: Create video content, animations, or video editing suggestions from text prompts.' },
+  { id: 'mail-write', name: '✉️ Email Writing', skill: 'Professional Email Writing: Compose clear, professional emails for various contexts (business, personal, formal, casual).' },
+  { id: 'research', name: '🔬 Research', skill: 'Research & Information Synthesis: Gather, analyze, and synthesize information from multiple sources on any topic.' },
+  { id: 'eli5', name: '👶 ELI5', skill: 'Explain Like I\'m 5: Break down complex topics into simple, easy-to-understand explanations suitable for beginners.' },
+  { id: 'analyst', name: '📊 Data Analyst', skill: 'Data Analysis: Analyze data, identify patterns, create visualizations, and provide actionable insights.' },
+  { id: 'code-review', name: '💻 Code Review', skill: 'Code Review: Review code for best practices, bugs, performance issues, and suggest improvements.' },
+  { id: 'translator', name: '🌐 Translator', skill: 'Language Translation: Translate text accurately between languages while preserving context and nuance.' },
+  { id: 'creative-writer', name: '✍️ Creative Writer', skill: 'Creative Writing: Write stories, poems, scripts, or creative content with engaging narratives and vivid descriptions.' },
+  { id: 'tutor', name: '🎓 Tutor', skill: 'Educational Tutoring: Explain concepts, provide examples, answer questions, and help with learning any subject.' },
+  { id: 'summarizer', name: '📝 Summarizer', skill: 'Content Summarization: Condense long texts into concise summaries while retaining key information.' },
 ];
 
-const estimateTokens = (text: string): number => {
-  if (!text) return 0;
-  // Rough estimation: ~4 chars per token for English
-  return Math.ceil(text.length / 4);
+const OUTPUT_FORMATS = [
+  { id: 'text', name: 'Plain Text' },
+  { id: 'json', name: 'JSON' },
+  { id: 'markdown', name: 'Markdown' },
+  { id: 'code', name: 'Code' },
+];
+
+const analyzePrompt = (prompt) => {
+  const lower = prompt.toLowerCase();
+  if (lower.match(/write|create|story|narrative|tale|article/)) return 'creative-writing';
+  if (lower.match(/code|script|program|function|algorithm/)) return 'coding';
+  if (lower.match(/analyze|examine|evaluate|compare|research/)) return 'analytical';
+  if (lower.match(/data|plot|graph|visualize|chart/)) return 'data-science';
+  return 'general';
 };
 
-export const PromptEnhancer = () => {
-  console.log("PromptEnhancer component rendering");
+const generateRuleBasedPrompt = (input, modelId, formatId) => {
+  const model = AI_MODELS.find(m => m.id === modelId);
+  const format = OUTPUT_FORMATS.find(f => f.id === formatId);
+  const intent = analyzePrompt(input);
 
-  const [inputPrompt, setInputPrompt] = useState("");
-  const [outputPrompt, setOutputPrompt] = useState("");
-  const [mode, setMode] = useState<Mode>("balanced");
-  const [format, setFormat] = useState<OutputFormat>("plain");
-  const [model, setModel] = useState<AIModel>("gpt-4");
+  let prompt = '';
+
+  const roles = {
+    'creative-writing': 'a skilled creative writer and storyteller',
+    'coding': 'an expert software engineer',
+    'analytical': 'a seasoned analyst and researcher',
+    'data-science': 'a data scientist',
+    'general': 'a knowledgeable expert'
+  };
+
+  prompt += `As ${roles[intent]}, please ${input}\n\n`;
+  prompt += `Requirements:\n`;
+
+  if (intent === 'creative-writing') {
+    prompt += `1. Create a compelling narrative with well-developed characters and vivid settings\n`;
+    prompt += `2. Employ literary techniques such as show-don't-tell and varied sentence structure\n`;
+    prompt += `3. Develop a clear theme or message that resonates\n`;
+    prompt += `4. Use dialogue effectively to reveal character and advance plot\n`;
+    prompt += `5. Maintain consistent tone, voice, and pacing\n\n`;
+  } else if (intent === 'coding') {
+    prompt += `1. Provide complete, working code that solves the problem efficiently\n`;
+    prompt += `2. Follow best practices and coding conventions\n`;
+    prompt += `3. Include comprehensive error handling and validation\n`;
+    prompt += `4. Write clear comments explaining complex logic\n`;
+    prompt += `5. Provide usage examples and test cases\n\n`;
+  } else if (intent === 'analytical') {
+    prompt += `1. Frame the analysis with a clear question or thesis\n`;
+    prompt += `2. Provide evidence-based reasoning from credible sources\n`;
+    prompt += `3. Present multiple perspectives on the topic\n`;
+    prompt += `4. Apply appropriate analytical frameworks\n`;
+    prompt += `5. Draw well-supported conclusions with implications\n\n`;
+  } else {
+    prompt += `1. Address all aspects comprehensively\n`;
+    prompt += `2. Provide accurate, well-researched information\n`;
+    prompt += `3. Organize content logically\n`;
+    prompt += `4. Include relevant examples\n`;
+    prompt += `5. Ensure clarity and accessibility\n\n`;
+  }
+
+  prompt += `Structure your response as follows:\n`;
+  if (intent === 'creative-writing') {
+    prompt += `- Opening hook that captures attention\n- Character introduction and setting\n- Plot development with rising tension\n- Climactic moment\n- Resolution and conclusion\n\n`;
+  } else if (intent === 'coding') {
+    prompt += `- Problem description and requirements\n- Solution approach explanation\n- Complete implementation with comments\n- Usage examples and test cases\n- Performance considerations\n\n`;
+  } else {
+    prompt += `- Introduction or overview\n- Main content in clear sections\n- Supporting details and examples\n- Summary or conclusion\n\n`;
+  }
+
+  if (format.id !== 'text') {
+    prompt += `Output Format: Provide response in **${format.name}** format.\n\n`;
+  }
+
+  prompt += `Keep the response medium length (300-500 words) for thorough coverage.\n\n`;
+  prompt += `Optimized for ${model.name}:\n`;
+  if (model.provider === 'Anthropic') {
+    prompt += `- Think step-by-step and show reasoning\n- Use structured thinking for complex tasks\n- Provide detailed explanations\n\n`;
+  } else if (model.provider === 'OpenAI') {
+    prompt += `- Provide clear, well-structured responses\n- Include concrete examples\n- Use logical flow\n\n`;
+  } else {
+    prompt += `- Provide thorough, research-backed information\n- Structure complex queries clearly\n\n`;
+  }
+
+  prompt += `##REFERENCE SUGGESTIONS##\n`;
+  if (intent === 'creative-writing') {
+    prompt += `- "The Elements of Style" by Strunk & White\n  Purpose: Essential writing principles\n  Integration: Apply for clear prose\n\n`;
+  } else if (intent === 'coding') {
+    prompt += `- Official documentation for relevant languages\n  Purpose: Authoritative syntax references\n  Integration: Ensure accurate implementation\n\n`;
+  }
+
+  prompt += `##THOUGHT PROCESS##\n\n`;
+  if (intent === 'creative-writing') {
+    prompt += `*Subtask 1*:\n- **Description**: Establish narrative foundation and theme\n- **Reasoning**: Strong foundation ensures coherent development\n- **Success criteria**: Clear theme, vivid setting, compelling hook\n\n`;
+  } else if (intent === 'coding') {
+    prompt += `*Subtask 1*:\n- **Description**: Define problem scope and requirements\n- **Reasoning**: Clear requirements prevent scope creep\n- **Success criteria**: Specific inputs/outputs, edge cases identified\n\n`;
+  }
+
+  return prompt;
+};
+
+const generateAIPrompt = async (input, modelId, formatId, apiKey) => {
+  const model = AI_MODELS.find(m => m.id === modelId);
+  const format = OUTPUT_FORMATS.find(f => f.id === formatId);
+
+  const systemPrompt = `You are an expert prompt engineer. Your task is to enhance user prompts to make them more effective for AI models.
+
+Transform the given prompt into a comprehensive, well-structured prompt that includes:
+1. Clear role/context for the AI
+2. Detailed requirements and specifications
+3. Structured output format guidance
+4. Reference suggestions (if applicable)
+5. Thought process breakdown with subtasks
+
+The enhanced prompt should follow this format:
+- Start with "As [role], please [task]"
+- Include a Requirements section with numbered points
+- Add a Structure section showing how to organize the response
+- If format is not plain text, specify the ${format.name} output format
+- Include ##REFERENCE SUGGESTIONS## section
+- Include ##THOUGHT PROCESS## section with subtasks
+
+Make it comprehensive and production-ready for ${model.name}.`;
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://prompt-wizard-seven.vercel.app',
+        'X-Title': 'Prompt Wizard'
+      },
+      body: JSON.stringify({
+        model: model.apiModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Enhance this prompt: "${input}"` }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'API request failed');
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default function AdvancedPromptGenerator() {
+  const [darkMode, setDarkMode] = useState(false);
+  const [input, setInput] = useState('');
+  const [output, setOutput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [model, setModel] = useState('gemma-3-12b');
+  const [format, setFormat] = useState('text');
   const [copied, setCopied] = useState(false);
-  const [isEnhancing, setIsEnhancing] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-  const [tokens, setTokens] = useState(0);
-  const [cost, setCost] = useState(0);
+  const [inputTokens, setInputTokens] = useState(0);
+  const [outputTokens, setOutputTokens] = useState(0);
+  const [useAPI, setUseAPI] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [error, setError] = useState('');
+  const [selectedSkill, setSelectedSkill] = useState('');
+  const [skillCopied, setSkillCopied] = useState(false);
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("darkMode", isDark.toString());
-  }, [isDark]);
+    setInputTokens(Math.ceil(input.split(/\s+/).filter(w => w).length * 1.3));
+  }, [input]);
 
   useEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode");
-    if (savedDarkMode !== null) {
-      setIsDark(savedDarkMode === "true");
-    } else {
-      // Check system preference
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setIsDark(prefersDark);
-    }
-  }, []);
+    setOutputTokens(Math.ceil(output.split(/\s+/).filter(w => w).length * 1.3));
+  }, [output]);
 
-  const inputTokens = useMemo(() => estimateTokens(inputPrompt), [inputPrompt]);
+  const generate = async () => {
+    if (!input.trim()) return;
 
-  const handleEnhance = async () => {
-    if (!inputPrompt.trim()) {
-      toast({
-        title: "Empty prompt",
-        description: "Please enter a prompt to enhance.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsEnhancing(true);
+    setLoading(true);
+    setError('');
 
     try {
-      const response = await fetch('/api/optimize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: inputPrompt,
-          model: model,
-          mode: mode,
-          format: format,
-        }),
-      });
+      let enhanced;
 
-      if (!response.ok) {
-        throw new Error('Failed to enhance prompt');
+      if (useAPI) {
+        if (!apiKey.trim()) {
+          setError('Please enter your API key');
+          setLoading(false);
+          return;
+        }
+        enhanced = await generateAIPrompt(input, model, format, apiKey);
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        enhanced = generateRuleBasedPrompt(input, model, format);
       }
 
-      const data = await response.json();
-      setOutputPrompt(data.optimized);
-      setTokens(data.tokens);
-      setCost(parseFloat(data.cost));
-
-      toast({
-        title: "Prompt enhanced!",
-        description: `Optimized for ${AI_MODELS.find(m => m.value === model)?.label}`,
-      });
-    } catch (error) {
-      console.error('Error enhancing prompt:', error);
-      toast({
-        title: "Error",
-        description: "Failed to enhance prompt. Please try again.",
-        variant: "destructive",
-      });
+      setOutput(enhanced);
+    } catch (err) {
+      setError(err.message || 'Failed to generate prompt');
     } finally {
-      setIsEnhancing(false);
+      setLoading(false);
     }
   };
 
-  const handleCopy = async () => {
-    if (!outputPrompt) return;
-
-    await navigator.clipboard.writeText(outputPrompt);
+  const copy = () => {
+    navigator.clipboard.writeText(output);
     setCopied(true);
-
-    toast({
-      title: "Copied!",
-      description: "Enhanced prompt copied to clipboard.",
-    });
-
     setTimeout(() => setCopied(false), 2000);
   };
 
-  try {
-    console.log("PromptEnhancer: Starting render");
-    return (
-      <div className="min-h-screen bg-background p-4 md:p-8">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="flex items-center justify-between">
-            <h1 className="text-4xl font-bold">Prompt Wizard</h1>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setIsDark(!isDark)}
-              className="w-10 h-10"
-            >
-              {isDark ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </Button>
-          </div>
+  const copySkill = () => {
+    if (!selectedSkill) return;
+    const skill = SKILL_TEMPLATES.find(s => s.id === selectedSkill);
+    if (skill) {
+      navigator.clipboard.writeText(skill.skill);
+      setSkillCopied(true);
+      setTimeout(() => setSkillCopied(false), 2000);
+    }
+  };
 
-          {/* Settings Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">AI Model</label>
-              <Select value={model} onValueChange={(value: AIModel) => setModel(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select AI model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AI_MODELS.map((modelOption) => (
-                    <SelectItem key={modelOption.value} value={modelOption.value}>
-                      {modelOption.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+  const bg = darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50';
+  const card = darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
+  const text = darkMode ? 'text-gray-100' : 'text-gray-800';
+  const textSec = darkMode ? 'text-gray-400' : 'text-gray-600';
+  const inputClass = darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900';
+
+  return (
+    <div className={`min-h-screen ${bg} p-4 md:p-8 transition-colors`}>
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl shadow-lg">
+              <Brain className="w-6 md:w-8 h-6 md:h-8 text-white" />
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Mode</label>
-              <Select value={mode} onValueChange={(value: Mode) => setMode(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="strict">Strict</SelectItem>
-                  <SelectItem value="balanced">Balanced</SelectItem>
-                  <SelectItem value="creative">Creative</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Output Format</label>
-              <Select value={format} onValueChange={(value: OutputFormat) => setFormat(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select format" />
-                </SelectTrigger>
-                <SelectContent>
-                  {OUTPUT_FORMATS.map((formatOption) => (
-                    <SelectItem key={formatOption.value} value={formatOption.value}>
-                      {formatOption.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div>
+              <h1 className={`text-2xl md:text-4xl font-bold ${text}`}>Advanced Prompt Generator</h1>
+              <p className={`text-xs md:text-sm ${textSec}`}>
+                {useAPI ? '🤖 AI-Powered Mode' : '⚡ Free Rule-Based Mode'} • Vercel-Ready
+              </p>
             </div>
           </div>
+          <button onClick={() => setDarkMode(!darkMode)} className={`p-3 rounded-lg ${card} border shadow-lg hover:shadow-xl transition-all`}>
+            {darkMode ? <Sun className="w-6 h-6 text-yellow-400" /> : <Moon className="w-6 h-6" />}
+          </button>
+        </div>
 
-          {/* Input Section */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-semibold">Input Prompt</h2>
-            <Textarea
-              value={inputPrompt}
-              onChange={(e) => setInputPrompt(e.target.value)}
-              placeholder="Enter your prompt here..."
-              className="min-h-[150px]"
-            />
-            <div className="text-sm text-muted-foreground">
-              {inputTokens} tokens
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className={`${card} border rounded-xl shadow-lg p-6`}>
+            <div className="flex items-center gap-2 mb-4">
+              <Settings className="w-5 h-5 text-purple-600" />
+              <h2 className={`text-lg font-semibold ${text}`}>Configuration</h2>
             </div>
-          </div>
 
-          {/* Enhance Button */}
-          <div className="flex justify-center">
-            <Button
-              onClick={handleEnhance}
-              disabled={!inputPrompt.trim() || isEnhancing}
-              className="px-8 py-3 text-lg"
-            >
-              {isEnhancing ? (
-                <>
-                  <Sparkles className="w-5 h-5 mr-2 animate-spin" />
-                  Enhancing...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Enhance Prompt
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Output Section */}
-          {outputPrompt && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Enhanced Prompt</h2>
-                <div className="flex items-center gap-4">
-                  <div className="text-sm text-muted-foreground">
-                    {tokens} tokens • ${cost.toFixed(4)}
+              <div className={`p-3 rounded-lg ${useAPI ? 'bg-blue-50 dark:bg-blue-900' : 'bg-green-50 dark:bg-green-900'} border-2 ${useAPI ? 'border-blue-200 dark:border-blue-700' : 'border-green-200 dark:border-green-700'}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {useAPI ? <Zap className="w-5 h-5 text-blue-600" /> : <Unlock className="w-5 h-5 text-green-600" />}
+                    <span className={`font-semibold text-sm ${text}`}>
+                      {useAPI ? 'AI-Powered Mode' : 'Free Mode'}
+                    </span>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopy}
-                    className="flex items-center gap-2"
+                  <button
+                    onClick={() => setUseAPI(!useAPI)}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      useAPI
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-green-600 text-white hover:bg-green-700'
+                    }`}
                   >
-                    {copied ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        Copy
-                      </>
-                    )}
-                  </Button>
+                    {useAPI ? 'Switch to Free' : 'Enable AI'}
+                  </button>
                 </div>
+                <p className={`text-xs ${textSec}`}>
+                  {useAPI
+                    ? 'Using real AI for intelligent enhancement (requires API key)'
+                    : 'Using smart rule-based generation (instant, no cost)'}
+                </p>
               </div>
-              <Textarea
-                value={outputPrompt}
-                readOnly
-                className="min-h-[200px] font-mono text-sm"
-                placeholder="Your enhanced prompt will appear here..."
-              />
+
+              {useAPI && (
+                <div>
+                  <label className={`block text-sm font-medium ${text} mb-2`}>
+                    OpenRouter API Key <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline text-xs">(Get free key)</a>
+                  </label>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your API key"
+                    className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 text-sm`}
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className={`block text-sm font-medium ${text} mb-2`}>Target AI Model</label>
+                <select value={model} onChange={(e) => setModel(e.target.value)} className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 text-sm`}>
+                  {AI_MODELS.map(m => <option key={m.id} value={m.id}>{m.name} ({m.provider})</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className={`block text-sm font-medium ${text} mb-2`}>Output Format</label>
+                <select value={format} onChange={(e) => setFormat(e.target.value)} className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 text-sm`}>
+                  {OUTPUT_FORMATS.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className={`text-sm font-medium ${text}`}>Add Skill to Chat</label>
+                </div>
+                <div className="flex gap-2">
+                  <select 
+                    value={selectedSkill} 
+                    onChange={(e) => setSelectedSkill(e.target.value)} 
+                    className={`flex-1 p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 text-sm`}
+                  >
+                    <option value="">Select a skill...</option>
+                    {SKILL_TEMPLATES.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                  <button
+                    onClick={copySkill}
+                    disabled={!selectedSkill}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                      selectedSkill
+                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {skillCopied ? <><Check className="w-4 h-4" />Copied!</> : <><Copy className="w-4 h-4" />Copy</>}
+                  </button>
+                </div>
+                {selectedSkill && (
+                  <div className={`mt-2 p-3 rounded-lg ${darkMode ? 'bg-gray-900 border-purple-500' : 'bg-purple-50 border-purple-200'} border text-xs ${text}`}>
+                    {SKILL_TEMPLATES.find(s => s.id === selectedSkill)?.skill}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className={`text-sm font-medium ${text}`}>Your Prompt</label>
+                  <span className={`text-xs ${textSec}`}>~{inputTokens} tokens</span>
+                </div>
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="e.g., 'create a story about apple' or 'write a python script to plot fibonacci spiral'"
+                  className={`w-full h-48 p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-purple-500 resize-none text-sm`}
+                />
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg">
+                  <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                </div>
+              )}
+
+              <button
+                onClick={generate}
+                disabled={loading || !input.trim()}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-400 transition-all flex items-center justify-center gap-2 shadow-lg"
+              >
+                {loading ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" />Generating...</>
+                ) : (
+                  <><Sparkles className="w-5 h-5" />{useAPI ? 'Generate with AI' : 'Generate Enhanced Prompt'}</>
+                )}
+              </button>
             </div>
-          )}
-          
-          {/* Footer */}
-          <footer className="mt-16 pt-8 border-t border-border">
-            <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Made with ❤️ by Shubham Mehta
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Licensed under Creative Commons (CC) Attribution-ShareAlike 4.0 International
-              </p>
+          </div>
+
+          <div className={`${card} border rounded-xl shadow-lg p-6`}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className={`text-lg font-semibold ${text}`}>Enhanced Output</h2>
+              {output && (
+                <div className="flex items-center gap-3">
+                  <span className={`text-xs ${textSec} bg-purple-100 dark:bg-purple-900 px-2 py-1 rounded`}>
+                    ~{outputTokens} tokens
+                  </span>
+                  <button onClick={copy} className="text-sm text-purple-600 hover:text-purple-700 flex items-center gap-1 px-3 py-1 rounded bg-purple-50 dark:bg-purple-900">
+                    {copied ? <><Check className="w-4 h-4" />Copied!</> : <><Copy className="w-4 h-4" />Copy</>}
+                  </button>
+                </div>
+              )}
             </div>
-          </footer>
+
+            <div className={`${darkMode ? 'bg-gray-900 border-purple-500' : 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200'} p-4 rounded-lg border-2 h-96 overflow-y-auto`}>
+              {output ? (
+                <pre className={`${text} whitespace-pre-wrap text-xs md:text-sm font-mono leading-relaxed`}>{output}</pre>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <Sparkles className={`w-12 h-12 ${textSec} mb-3`} />
+                  <p className={`${textSec} text-sm`}>Enter a prompt and click Generate to see the enhanced version</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    );
-  } catch (error) {
-    console.error("Error rendering PromptEnhancer:", error);
-    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
-    return (
-      <div className="min-h-screen bg-background p-4 md:p-8">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <h1 className="text-4xl font-bold text-center text-red-500">Error Loading Prompt Wizard</h1>
-          <p className="text-center">Check console for details.</p>
-          <pre className="bg-red-50 p-4 rounded text-sm overflow-auto">
-            {error instanceof Error ? error.message : String(error)}
-          </pre>
+
+        <div className={`mt-6 ${card} border rounded-xl shadow-lg p-4`}>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className={`text-xs ${textSec} text-center md:text-left`}>
+              🚀 Hybrid Mode: Free Rule-Based OR AI-Powered • Deploy on Vercel • No Backend Needed
+            </p>
+            <a
+              href="https://github.com/Justme017/Prompt-Wizard"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg transition-colors shadow-md hover:shadow-lg"
+            >
+              <Star className="w-4 h-4" />
+              <span className="text-sm font-medium">Give a Star for Prompt Wizard!</span>
+            </a>
+          </div>
         </div>
+
+        {/* Footer */}
+        <footer className={`mt-8 ${card} border rounded-xl shadow-lg p-6 text-center`}>
+          <div className="space-y-2">
+            <p className={`text-sm ${text}`}>
+              Made with ❤️ by Shubham Mehta
+            </p>
+            <p className={`text-xs ${textSec}`}>
+              Licensed under Creative Commons (CC) Attribution-ShareAlike 4.0 International
+            </p>
+          </div>
+        </footer>
       </div>
-    );
-  }
-};
+    </div>
+  );
+}

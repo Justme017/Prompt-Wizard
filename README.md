@@ -1,16 +1,18 @@
-# Prompt Wizard
+# Advanced Prompt Generator
 
-A modern, AI-powered prompt optimization tool that helps you craft better prompts for various AI models. Enhance your prompts with different modes (strict, balanced, creative) and output formats.
+A modern, AI-powered prompt optimization tool that helps you craft better prompts for various AI models. Features both free rule-based generation and AI-powered enhancement with support for multiple models and output formats.
 
 ## ✨ Features
 
-- **Multiple AI Models**: Support for GPT-4, GPT-3.5, Claude 3, Claude 2, Gemini Pro, Gemini Ultra, Llama 3, and Mistral Large
-- **Optimization Modes**: Choose from strict, balanced, or creative optimization styles
-- **Output Formats**: Generate prompts in plain text, JSON, Markdown, or XML formats
-- **Dark Mode**: Toggle between light and dark themes with system preference detection
-- **Real-time Token Counting**: See token usage and cost estimates
+- **Hybrid Generation Modes**: Choose between free rule-based generation or AI-powered enhancement
+- **Multiple AI Models**: Support for GPT-4o, GPT-4 Turbo, Claude 3.5 Sonnet, GPT-3.5 Turbo, and Gemini Pro
+- **Smart Intent Analysis**: Automatically detects prompt intent (creative writing, coding, analytical, data science, general)
+- **Output Formats**: Generate prompts optimized for plain text, JSON, Markdown, or code
+- **Dark Mode**: Toggle between light and dark themes with smooth transitions
+- **Real-time Token Counting**: See token usage estimates for input and output
 - **Copy to Clipboard**: Easily copy enhanced prompts
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Vercel-Ready**: Deploy instantly with no backend configuration needed
 
 ## 🚀 Live Demo
 
@@ -20,17 +22,17 @@ Visit the live application: [https://prompt-wizard-seven.vercel.app](https://pro
 
 - **Frontend**: React 18 with TypeScript
 - **Build Tool**: Vite
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **Deployment**: Vercel with serverless functions
+- **Styling**: Tailwind CSS with custom dark mode support
 - **Icons**: Lucide React
-- **Notifications**: Sonner for toast messages
+- **Deployment**: Vercel with serverless functions
+- **AI Integration**: AIMLAPI for AI-powered generation
 
 ## 📦 Installation
 
 1. **Clone the repository**
    ```bash
    git clone <YOUR_GIT_URL>
-   cd prompt-wizard
+   cd advanced-prompt-generator
    ```
 
 2. **Install dependencies**
@@ -66,34 +68,46 @@ npx vercel --prod
 ```
 src/
 ├── components/
-│   ├── ui/           # Reusable UI components (shadcn/ui)
-│   └── PromptEnhancer.tsx  # Main application component
-├── hooks/            # Custom React hooks
-├── lib/              # Utility functions
-└── main.tsx          # Application entry point
+│   └── PromptEnhancer.tsx          # Main AdvancedPromptGenerator component
+├── pages/
+│   ├── Index.tsx                   # Home page
+│   └── NotFound.tsx                # 404 page
+├── hooks/                          # Custom React hooks
+├── lib/                           # Utility functions
+└── main.tsx                       # Application entry point
 
-api/
-└── optimize.js       # Serverless function for prompt optimization
-
-public/               # Static assets
+public/                            # Static assets
 ```
 
-## 🎨 Customization
+## 🎨 Features Overview
 
-### Adding New AI Models
+### Generation Modes
 
-Edit the `AI_MODELS` array in `src/components/PromptEnhancer.tsx`:
+1. **Free Rule-Based Mode** (⚡)
+   - Instant generation with no API costs
+   - Smart intent analysis and context-aware prompt structuring
+   - Optimized for different content types (writing, coding, analysis, etc.)
 
-```typescript
-const AI_MODELS: { value: AIModel; label: string; provider: string }[] = [
-  // Add your new model here
-  { value: "your-model", label: "Your Model Name", provider: "Provider Name" },
-];
-```
+2. **AI-Powered Mode** (🤖)
+   - Uses AIMLAPI for intelligent prompt enhancement
+   - Requires free API key from [aimlapi.com](https://aimlapi.com)
+   - Advanced prompt engineering with AI assistance
 
-### Modifying Optimization Logic
+### Intent Analysis
 
-The API endpoint in `api/optimize.js` handles the prompt optimization. You can modify the logic there to integrate with different AI services or adjust the optimization algorithms.
+The tool automatically analyzes your prompt to determine the intent:
+- **Creative Writing**: Stories, articles, narratives
+- **Coding**: Scripts, programs, algorithms
+- **Analytical**: Research, evaluation, comparison
+- **Data Science**: Visualization, plotting, analysis
+- **General**: All other types of prompts
+
+### Model Optimization
+
+Each AI model gets tailored optimization:
+- **OpenAI Models**: Clear structure, logical flow, concrete examples
+- **Anthropic Models**: Step-by-step reasoning, structured thinking
+- **Google Models**: Research-backed information, clear queries
 
 ## 🤝 Contributing
 
@@ -115,7 +129,7 @@ Made with ❤️ by Shubham Mehta
 
 ## 🙏 Acknowledgments
 
-- [shadcn/ui](https://ui.shadcn.com/) for the beautiful component library
 - [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
 - [Vercel](https://vercel.com/) for the amazing deployment platform
 - [Lucide](https://lucide.dev/) for the beautiful icons
+- [AIMLAPI](https://aimlapi.com/) for the AI integration
