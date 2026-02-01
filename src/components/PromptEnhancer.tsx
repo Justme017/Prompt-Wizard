@@ -48,78 +48,23 @@ const generateRuleBasedPrompt = (input, modelId, formatId) => {
 
   let prompt = '';
 
-  const roles = {
-    'creative-writing': 'a skilled creative writer and storyteller',
-    'coding': 'an expert software engineer',
-    'analytical': 'a seasoned analyst and researcher',
-    'data-science': 'a data scientist',
-    'general': 'a knowledgeable expert'
-  };
-
-  prompt += `As ${roles[intent]}, please ${input}\n\n`;
-  prompt += `Requirements:\n`;
-
+  // Simple, concise enhancement based on intent
   if (intent === 'creative-writing') {
-    prompt += `1. Create a compelling narrative with well-developed characters and vivid settings\n`;
-    prompt += `2. Employ literary techniques such as show-don't-tell and varied sentence structure\n`;
-    prompt += `3. Develop a clear theme or message that resonates\n`;
-    prompt += `4. Use dialogue effectively to reveal character and advance plot\n`;
-    prompt += `5. Maintain consistent tone, voice, and pacing\n\n`;
+    prompt = `Create an engaging, well-crafted piece about: ${input}. Use vivid descriptions, compelling characters, and strong narrative flow. Structure with a clear beginning, development, and satisfying conclusion.`;
   } else if (intent === 'coding') {
-    prompt += `1. Provide complete, working code that solves the problem efficiently\n`;
-    prompt += `2. Follow best practices and coding conventions\n`;
-    prompt += `3. Include comprehensive error handling and validation\n`;
-    prompt += `4. Write clear comments explaining complex logic\n`;
-    prompt += `5. Provide usage examples and test cases\n\n`;
+    prompt = `Provide a complete, working solution for: ${input}. Include clean, well-documented code following best practices, with error handling and usage examples. Explain the approach briefly.`;
   } else if (intent === 'analytical') {
-    prompt += `1. Frame the analysis with a clear question or thesis\n`;
-    prompt += `2. Provide evidence-based reasoning from credible sources\n`;
-    prompt += `3. Present multiple perspectives on the topic\n`;
-    prompt += `4. Apply appropriate analytical frameworks\n`;
-    prompt += `5. Draw well-supported conclusions with implications\n\n`;
+    prompt = `Conduct a thorough analysis of: ${input}. Support conclusions with evidence, consider multiple perspectives, and provide actionable insights. Structure the response with clear sections and logical flow.`;
+  } else if (intent === 'data-science') {
+    prompt = `Perform data science task: ${input}. Follow standard methodology, explain key concepts clearly, address data considerations, and provide relevant visualizations or descriptions.`;
   } else {
-    prompt += `1. Address all aspects comprehensively\n`;
-    prompt += `2. Provide accurate, well-researched information\n`;
-    prompt += `3. Organize content logically\n`;
-    prompt += `4. Include relevant examples\n`;
-    prompt += `5. Ensure clarity and accessibility\n\n`;
+    // General enhancement - just improve clarity and add structure
+    prompt = `Please help with: ${input}. Provide a comprehensive, well-structured response with clear explanations, relevant examples, and practical insights.`;
   }
 
-  prompt += `Structure your response as follows:\n`;
-  if (intent === 'creative-writing') {
-    prompt += `- Opening hook that captures attention\n- Character introduction and setting\n- Plot development with rising tension\n- Climactic moment\n- Resolution and conclusion\n\n`;
-  } else if (intent === 'coding') {
-    prompt += `- Problem description and requirements\n- Solution approach explanation\n- Complete implementation with comments\n- Usage examples and test cases\n- Performance considerations\n\n`;
-  } else {
-    prompt += `- Introduction or overview\n- Main content in clear sections\n- Supporting details and examples\n- Summary or conclusion\n\n`;
-  }
-
+  // Add format specification if needed
   if (format.id !== 'text') {
-    prompt += `Output Format: Provide response in **${format.name}** format.\n\n`;
-  }
-
-  prompt += `Keep the response medium length (300-500 words) for thorough coverage.\n\n`;
-  prompt += `Optimized for ${model.name}:\n`;
-  if (model.provider === 'Anthropic') {
-    prompt += `- Think step-by-step and show reasoning\n- Use structured thinking for complex tasks\n- Provide detailed explanations\n\n`;
-  } else if (model.provider === 'OpenAI') {
-    prompt += `- Provide clear, well-structured responses\n- Include concrete examples\n- Use logical flow\n\n`;
-  } else {
-    prompt += `- Provide thorough, research-backed information\n- Structure complex queries clearly\n\n`;
-  }
-
-  prompt += `##REFERENCE SUGGESTIONS##\n`;
-  if (intent === 'creative-writing') {
-    prompt += `- "The Elements of Style" by Strunk & White\n  Purpose: Essential writing principles\n  Integration: Apply for clear prose\n\n`;
-  } else if (intent === 'coding') {
-    prompt += `- Official documentation for relevant languages\n  Purpose: Authoritative syntax references\n  Integration: Ensure accurate implementation\n\n`;
-  }
-
-  prompt += `##THOUGHT PROCESS##\n\n`;
-  if (intent === 'creative-writing') {
-    prompt += `*Subtask 1*:\n- **Description**: Establish narrative foundation and theme\n- **Reasoning**: Strong foundation ensures coherent development\n- **Success criteria**: Clear theme, vivid setting, compelling hook\n\n`;
-  } else if (intent === 'coding') {
-    prompt += `*Subtask 1*:\n- **Description**: Define problem scope and requirements\n- **Reasoning**: Clear requirements prevent scope creep\n- **Success criteria**: Specific inputs/outputs, edge cases identified\n\n`;
+    prompt += ` Format the output as ${format.name}.`;
   }
 
   return prompt;
@@ -129,24 +74,7 @@ const generateAIPrompt = async (input, modelId, formatId, apiKey) => {
   const model = AI_MODELS.find(m => m.id === modelId);
   const format = OUTPUT_FORMATS.find(f => f.id === formatId);
 
-  const systemPrompt = `You are an expert prompt engineer. Your task is to enhance user prompts to make them more effective for AI models.
-
-Transform the given prompt into a comprehensive, well-structured prompt that includes:
-1. Clear role/context for the AI
-2. Detailed requirements and specifications
-3. Structured output format guidance
-4. Reference suggestions (if applicable)
-5. Thought process breakdown with subtasks
-
-The enhanced prompt should follow this format:
-- Start with "As [role], please [task]"
-- Include a Requirements section with numbered points
-- Add a Structure section showing how to organize the response
-- If format is not plain text, specify the ${format.name} output format
-- Include ##REFERENCE SUGGESTIONS## section
-- Include ##THOUGHT PROCESS## section with subtasks
-
-Make it comprehensive and production-ready for ${model.name}.`;
+  const systemPrompt = `You are a prompt enhancement assistant. The user will give you a brief prompt. Rewrite it to be more detailed, clear, and effective. Output ONLY the enhanced prompt, nothing else. Do not explain your changes or add commentary. Just return the improved version of their prompt as ${format.name}.`;
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -161,7 +89,7 @@ Make it comprehensive and production-ready for ${model.name}.`;
         model: model.apiModel,
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Enhance this prompt: "${input}"` }
+          { role: 'user', content: input }
         ],
         temperature: 0.7,
         max_tokens: 2000

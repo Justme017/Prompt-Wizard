@@ -25,7 +25,7 @@ Visit the live application: [https://prompt-wizard-seven.vercel.app](https://pro
 - **Styling**: Tailwind CSS with custom dark mode support
 - **Icons**: Lucide React
 - **Deployment**: Vercel with serverless functions
-- **AI Integration**: AIMLAPI for AI-powered generation
+- **AI Integration**: OpenRouter API for AI-powered generation
 
 ## 📦 Installation
 
@@ -89,9 +89,10 @@ public/                            # Static assets
    - Optimized for different content types (writing, coding, analysis, etc.)
 
 2. **AI-Powered Mode** (🤖)
-   - Uses AIMLAPI for intelligent prompt enhancement
-   - Requires free API key from [aimlapi.com](https://aimlapi.com)
+   - Uses OpenRouter API for intelligent prompt enhancement
+   - Requires API key from [openrouter.ai](https://openrouter.ai/keys)
    - Advanced prompt engineering with AI assistance
+   - Supports multiple AI models including GPT-4o, Claude 3.5, Gemini Pro, and more
 
 ### Intent Analysis
 
@@ -132,4 +133,4 @@ Made with ❤️ by Shubham Mehta
 - [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
 - [Vercel](https://vercel.com/) for the amazing deployment platform
 - [Lucide](https://lucide.dev/) for the beautiful icons
-- [AIMLAPI](https://aimlapi.com/) for the AI integration
+- [OpenRouter](https://openrouter.ai/) for the AI integration
