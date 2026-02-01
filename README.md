@@ -37,7 +37,7 @@ Visit the live application: [https://prompt-wizard-seven.vercel.app](https://pro
 
 1. **Clone the repository**
    ```bash
-   git clone (https://github.com/Justme017/Prompt-Wizard)
+   git clone https://github.com/Justme017/Prompt-Wizard
    cd advanced-prompt-generator
    ```
 
