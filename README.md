@@ -1,8 +1,10 @@
 <p align="center">
-  <img src="./public/banner.png" alt="Prompt Wizard Banner" width="100%">
+  <img src="public/1769975609060.png" alt="Prompt Wizard Banner" width="100%">
 </p>
 
-# Advanced Prompt Generator
+# Prompt Wizard
+
+### Advanced Prompt Generator
 
 A modern, AI-powered prompt optimization tool that helps you craft better prompts for various AI models. Features both free rule-based generation and AI-powered enhancement with support for multiple models and output formats.
 

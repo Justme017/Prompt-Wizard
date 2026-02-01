@@ -192,9 +192,9 @@ export default function AdvancedPromptGenerator() {
               <Brain className="w-6 md:w-8 h-6 md:h-8 text-white" />
             </div>
             <div>
-              <h1 className={`text-2xl md:text-4xl font-bold ${text}`}>Advanced Prompt Generator</h1>
+              <h1 className={`text-2xl md:text-4xl font-bold ${text}`}>Prompt Wizard</h1>
               <p className={`text-xs md:text-sm ${textSec}`}>
-                {useAPI ? '🤖 AI-Powered Mode' : '⚡ Free Rule-Based Mode'} • Vercel-Ready
+                Advanced Prompt Generator • {useAPI ? '🤖 AI-Powered Mode' : '⚡ Free Mode'}
               </p>
             </div>
           </div>
