@@ -46,35 +46,57 @@ const generateRuleBasedPrompt = (input, modelId, formatId) => {
   const format = OUTPUT_FORMATS.find(f => f.id === formatId);
   const intent = analyzePrompt(input);
 
-  let prompt = '';
+  let role = '';
+  let objective = '';
+  let context = '';
+  let data = '';
 
-  // Simple, concise enhancement based on intent
+  // Determine role, objective, context, and data based on intent
   if (intent === 'creative-writing') {
-    prompt = `Create an engaging, well-crafted piece about: ${input}. Use vivid descriptions, compelling characters, and strong narrative flow. Structure with a clear beginning, development, and satisfying conclusion.`;
+    role = 'Creative Writer';
+    objective = 'Create an engaging, well-crafted piece with vivid descriptions, compelling characters, and strong narrative flow.';
+    context = `Task: ${input}. Structure with a clear beginning, development, and satisfying conclusion.`;
+    data = 'Use descriptive language, develop characters thoroughly, maintain consistent tone and pacing.';
   } else if (intent === 'coding') {
-    prompt = `Provide a complete, working solution for: ${input}. Include clean, well-documented code following best practices, with error handling and usage examples. Explain the approach briefly.`;
+    role = 'Software Engineer';
+    objective = 'Provide a complete, working solution with clean, well-documented code following best practices.';
+    context = `Task: ${input}. Include error handling and usage examples.`;
+    data = 'Code should be production-ready, properly commented, and follow language-specific conventions.';
   } else if (intent === 'analytical') {
-    prompt = `Conduct a thorough analysis of: ${input}. Support conclusions with evidence, consider multiple perspectives, and provide actionable insights. Structure the response with clear sections and logical flow.`;
+    role = 'Analytical Expert';
+    objective = 'Conduct a thorough analysis with evidence-based conclusions and actionable insights.';
+    context = `Task: ${input}. Consider multiple perspectives and structure the response with clear sections.`;
+    data = 'Support all claims with evidence, maintain logical flow, and provide practical recommendations.';
   } else if (intent === 'data-science') {
-    prompt = `Perform data science task: ${input}. Follow standard methodology, explain key concepts clearly, address data considerations, and provide relevant visualizations or descriptions.`;
+    role = 'Data Scientist';
+    objective = 'Perform data science task following standard methodology with clear explanations.';
+    context = `Task: ${input}. Address data considerations and provide relevant visualizations.`;
+    data = 'Include statistical analysis, data preprocessing steps, and interpretation of results.';
   } else {
-    // General enhancement - just improve clarity and add structure
-    prompt = `Please help with: ${input}. Provide a comprehensive, well-structured response with clear explanations, relevant examples, and practical insights.`;
+    role = 'Expert Assistant';
+    objective = 'Provide a comprehensive, well-structured response with clear explanations.';
+    context = `Task: ${input}. Include relevant examples and practical insights.`;
+    data = 'Ensure accuracy, clarity, and actionable information in the response.';
   }
 
   // Add format specification if needed
-  if (format.id !== 'text') {
-    prompt += ` Format the output as ${format.name}.`;
-  }
+  const formatNote = format.id !== 'text' ? ` Format the output as ${format.name}.` : '';
 
-  return prompt;
+  return `ROLE: ${role}\n\nOBJECTIVE: ${objective}\n\nCONTEXT: ${context}\n\nDATA: ${data}${formatNote}`;
 };
 
 const generateAIPrompt = async (input, modelId, formatId, apiKey) => {
   const model = AI_MODELS.find(m => m.id === modelId);
   const format = OUTPUT_FORMATS.find(f => f.id === formatId);
 
-  const systemPrompt = `You are a prompt enhancement assistant. The user will give you a brief prompt. Rewrite it to be more detailed, clear, and effective. Output ONLY the enhanced prompt, nothing else. Do not explain your changes or add commentary. Just return the improved version of their prompt as ${format.name}.`;
+  const systemPrompt = `You are a prompt enhancement assistant. The user will give you a brief prompt. Rewrite it in the following structured format:
+
+ROLE: [Define the role/persona that should respond]
+OBJECTIVE: [State the clear goal/objective]
+CONTEXT: [Provide relevant context and requirements]
+DATA: [Specify any data requirements, constraints, or guidelines]
+
+Output ONLY the enhanced prompt in this exact format, nothing else. Do not add explanations or commentary. Format as ${format.name} if applicable.`;
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
