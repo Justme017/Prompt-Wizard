@@ -1,8 +1,8 @@
-import AdvancedPromptGenerator from "@/components/PromptEnhancer";
+import PromptWizardV2 from "@/components/PromptWizardV2";
 
 const Index = () => {
   console.log("Index component rendering");
-  return <AdvancedPromptGenerator />;
+  return <PromptWizardV2 />;
 };
 
 export default Index;

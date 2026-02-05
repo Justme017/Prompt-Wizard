@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Wizard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 400px;
+      min-height: 500px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%);
+      color: white;
+    }
+
+    .header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .logo {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .version {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .setting-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .setting-label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .toggle.active {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle.active .toggle-slider {
+      left: 25px;
+      background: #0d9488;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 6px;
+      opacity: 0.9;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: white;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    select option {
+      background: #0d9488;
+      color: white;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #0d9488;
+      margin-bottom: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .footer {
+      padding: 16px 20px;
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.8;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .footer a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 8px;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .quick-action {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .quick-action:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">🪄</div>
+    <h1>Prompt Wizard</h1>
+    <div class="version">V3 - Browser Extension</div>
+  </div>
+
+  <div class="content">
+    <div class="status">
+      <div class="status-dot"></div>
+      <span id="status-text">Extension Active</span>
+    </div>
+
+    <div class="section">
+      <div class="section-title">⚙️ Settings</div>
+      
+      <div class="setting-row">
+        <div class="setting-label">Auto-Detect Prompts</div>
+        <div class="toggle active" id="toggle-auto-detect">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">Show Notifications</div>
+        <div class="toggle active" id="toggle-notifications">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Default AI Model</label>
+        <select id="default-model">
+          <option value="gemma-3-12b">Gemma 3 12B (Free)</option>
+          <option value="llama-3-70b">Llama 3 70B (Free)</option>
+          <option value="mixtral-8x7b">Mixtral 8x7B (Free)</option>
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>OpenRouter API Key (Optional)</label>
+        <input type="password" id="api-key" placeholder="sk-or-...">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📊 Usage Stats</div>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="prompts-enhanced">0</div>
+          <div class="stat-label">Enhanced</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="time-saved">0h</div>
+          <div class="stat-label">Time Saved</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🚀 Quick Actions</div>
+      <div class="quick-actions">
+        <div class="quick-action" id="open-webapp">
+          <div>🌐</div>
+          <div>Web App</div>
+        </div>
+        <div class="quick-action" id="view-history">
+          <div>📜</div>
+          <div>History</div>
+        </div>
+        <div class="quick-action" id="clear-data">
+          <div>🗑️</div>
+          <div>Clear Data</div>
+        </div>
+        <div class="quick-action" id="report-bug">
+          <div>🐛</div>
+          <div>Report Bug</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="test-enhance">
+      ✨ Test Enhancement
+    </button>
+    <button class="btn btn-secondary" id="open-settings">
+      ⚙️ Advanced Settings
+    </button>
+  </div>
+
+  <div class="footer">
+    Made with ❤️ by <a href="https://github.com/Justme017" target="_blank">Shubham Mehta</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
