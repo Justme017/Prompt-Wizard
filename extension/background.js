@@ -135,14 +135,26 @@ Output ONLY in this format, nothing else.`;
 
 // Handle messages from content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'enhancePrompt') {
+  console.log('📨 Background received message:', request.action);
+    if (request.action === 'ping') {
+    console.log('🏓 Ping received, responding...');
+    sendResponse({ success: true, status: 'alive' });
+    return false;
+  }
+    if (request.action === 'enhancePrompt') {
+    console.log('🔄 Processing enhancement request...');
+    
     handleEnhancePrompt(request.text).then(result => {
+      console.log('✅ Enhancement complete:', result.success);
       sendResponse(result);
     }).catch(error => {
+      console.error('❌ Enhancement error:', error);
       sendResponse({ success: false, error: error.message });
     });
     return true; // Keep channel open for async response
   }
+  
+  return false;
 });
 
 // Handle prompt enhancement

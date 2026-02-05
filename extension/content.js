@@ -160,25 +160,40 @@ async function enhanceCurrentPrompt() {
   
   isProcessing = true;
   showLoadingState();
+  console.log('🎯 Starting enhancement for:', originalText.substring(0, 50) + '...');
   
   try {
-    // Send message to background script to enhance
-    const response = await chrome.runtime.sendMessage({
+    // Add timeout to prevent infinite loading
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Enhancement timed out after 30 seconds')), 30000)
+    );
+    
+    const enhancePromise = chrome.runtime.sendMessage({
       action: 'enhancePrompt',
       text: originalText
     });
     
-    if (response.success) {
+    // Race between enhancement and timeout
+    const response = await Promise.race([enhancePromise, timeoutPromise]);
+    
+    console.log('✅ Enhancement response:', response);
+    
+    if (response && response.success) {
       // Show preview panel with enhanced prompt
       showEnhancedPromptPanel(originalText, response.enhanced);
+      showNotification('✨ Prompt enhanced successfully!');
     } else {
-      showNotification('Failed to enhance: ' + (response.error || 'Unknown error'));
+      const errorMsg = response?.error || 'Unknown error occurred';
+      console.error('❌ Enhancement failed:', errorMsg);
+      showNotification('Failed to enhance: ' + errorMsg);
     }
   } catch (error) {
+    console.error('❌ Enhancement error:', error);
     showNotification('Error: ' + error.message);
   } finally {
     isProcessing = false;
     hideLoadingState();
+    console.log('🏁 Enhancement process completed');
   }
 }
 
@@ -343,6 +358,19 @@ function handleResize() {
 // Initialize
 function init() {
   console.log('🪄 Prompt Wizard extension loaded');
+  
+  // Check if background script is available
+  try {
+    chrome.runtime.sendMessage({ action: 'ping' }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('❌ Background script not responding:', chrome.runtime.lastError);
+      } else {
+        console.log('✅ Background script connected');
+      }
+    });
+  } catch (error) {
+    console.error('❌ Failed to connect to background script:', error);
+  }
   
   // Add event listeners
   document.addEventListener('focusin', handleFocusChange);

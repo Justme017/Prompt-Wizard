@@ -320,7 +320,13 @@
 
       <div class="input-group">
         <label>OpenRouter API Key (Optional)</label>
-        <input type="password" id="api-key" placeholder="sk-or-...">
+        <div style="position: relative;">
+          <input type="password" id="api-key" placeholder="sk-or-..." style="padding-right: 35px;">
+          <div id="api-verify-status" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 16px; display: none;">
+            <span id="verify-icon"></span>
+          </div>
+        </div>
+        <small id="api-key-help" style="font-size: 11px; opacity: 0.8; display: block; margin-top: 4px;">Free tier available. Get key from <a href="https://openrouter.ai/keys" target="_blank" style="color: #fff; text-decoration: underline;">openrouter.ai</a></small>
       </div>
     </div>
 

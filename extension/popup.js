@@ -22,6 +22,66 @@ async function loadSettings() {
   return settings;
 }
 
+// Verify API key with OpenRouter
+async function verifyApiKey(apiKey) {
+  if (!apiKey || !apiKey.trim()) {
+    return { valid: false, message: '' };
+  }
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { valid: true, message: 'Valid API key', data };
+    } else if (response.status === 401) {
+      return { valid: false, message: 'Invalid API key' };
+    } else {
+      return { valid: false, message: 'Could not verify' };
+    }
+  } catch (error) {
+    console.error('API verification error:', error);
+    return { valid: false, message: 'Verification failed' };
+  }
+}
+
+// Update API key status indicator
+function updateApiKeyStatus(status, message = '') {
+  const statusDiv = document.getElementById('api-verify-status');
+  const iconSpan = document.getElementById('verify-icon');
+  const helpText = document.getElementById('api-key-help');
+
+  if (status === 'verifying') {
+    statusDiv.style.display = 'block';
+    iconSpan.textContent = '⏳';
+    iconSpan.title = 'Verifying...';
+    helpText.textContent = 'Verifying API key...';
+    helpText.style.color = '#fbbf24';
+  } else if (status === 'valid') {
+    statusDiv.style.display = 'block';
+    iconSpan.textContent = '✅';
+    iconSpan.title = 'Valid API key';
+    helpText.innerHTML = '✓ Valid API key - AI enhancement enabled';
+    helpText.style.color = '#10b981';
+  } else if (status === 'invalid') {
+    statusDiv.style.display = 'block';
+    iconSpan.textContent = '❌';
+    iconSpan.title = message || 'Invalid API key';
+    helpText.innerHTML = '✗ ' + (message || 'Invalid API key') + ' - Using rule-based mode';
+    helpText.style.color = '#ef4444';
+  } else if (status === 'empty') {
+    statusDiv.style.display = 'none';
+    helpText.innerHTML = 'Free tier available. Get key from <a href="https://openrouter.ai/keys" target="_blank" style="color: #fff; text-decoration: underline;">openrouter.ai</a>';
+    helpText.style.color = 'rgba(255, 255, 255, 0.8)';
+  }
+}
+
 // Save settings
 async function saveSetting(key, value) {
   await chrome.storage.sync.set({ [key]: value });
@@ -30,6 +90,15 @@ async function saveSetting(key, value) {
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   const settings = await loadSettings();
+
+  // Verify API key on load if present
+  if (settings.apiKey && settings.apiKey.trim()) {
+    updateApiKeyStatus('verifying');
+    const result = await verifyApiKey(settings.apiKey);
+    updateApiKeyStatus(result.valid ? 'valid' : 'invalid', result.message);
+  } else {
+    updateApiKeyStatus('empty');
+  }
 
   // Toggle switches
   document.getElementById('toggle-auto-detect').addEventListener('click', function() {
@@ -47,9 +116,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveSetting('defaultModel', this.value);
   });
 
-  // API key
-  document.getElementById('api-key').addEventListener('change', function() {
-    saveSetting('apiKey', this.value);
+  // API key with verification
+  let verifyTimeout;
+  document.getElementById('api-key').addEventListener('input', function() {
+    const apiKey = this.value.trim();
+    
+    // Clear previous timeout
+    clearTimeout(verifyTimeout);
+    
+    if (!apiKey) {
+      updateApiKeyStatus('empty');
+      saveSetting('apiKey', '');
+      return;
+    }
+    
+    // Show verifying status immediately
+    updateApiKeyStatus('verifying');
+    
+    // Debounce verification (wait 1 second after user stops typing)
+    verifyTimeout = setTimeout(async () => {
+      const result = await verifyApiKey(apiKey);
+      updateApiKeyStatus(result.valid ? 'valid' : 'invalid', result.message);
+      
+      // Only save if valid or if user explicitly wants to save invalid key
+      if (result.valid) {
+        saveSetting('apiKey', apiKey);
+      }
+    }, 1000);
+  });
+  
+  // Save on blur regardless of validity (user might want to save and fix later)
+  document.getElementById('api-key').addEventListener('blur', function() {
+    saveSetting('apiKey', this.value.trim());
   });
 
   // Quick actions
