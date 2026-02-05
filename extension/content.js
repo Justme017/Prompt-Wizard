@@ -148,6 +148,17 @@ function setElementText(element, text) {
   }
 }
 
+// Wake up service worker if inactive
+async function wakeUpServiceWorker() {
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'ping' });
+    return response?.success === true;
+  } catch (error) {
+    console.warn('⚠️ Service worker may be inactive:', error);
+    return false;
+  }
+}
+
 // Enhance the current prompt
 async function enhanceCurrentPrompt() {
   if (isProcessing || !currentActiveElement) return;
@@ -163,6 +174,22 @@ async function enhanceCurrentPrompt() {
   console.log('🎯 Starting enhancement for:', originalText.substring(0, 50) + '...');
   
   try {
+    // First, wake up service worker if needed
+    console.log('🔌 Checking service worker status...');
+    const isAwake = await wakeUpServiceWorker();
+    
+    if (!isAwake) {
+      console.warn('⚠️ Service worker inactive, attempting to wake up...');
+      // Try once more after a brief delay
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const secondTry = await wakeUpServiceWorker();
+      if (!secondTry) {
+        throw new Error('Service worker is inactive. Please reload the extension.');
+      }
+    }
+    
+    console.log('✅ Service worker is active');
+    
     // Add timeout to prevent infinite loading
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('Enhancement timed out after 30 seconds')), 30000)
@@ -189,7 +216,12 @@ async function enhanceCurrentPrompt() {
     }
   } catch (error) {
     console.error('❌ Enhancement error:', error);
-    showNotification('Error: ' + error.message);
+    
+    if (error.message.includes('Service worker')) {
+      showNotification('⚠️ Extension inactive. Reload extension at brave://extensions/');
+    } else {
+      showNotification('Error: ' + error.message);
+    }
   } finally {
     isProcessing = false;
     hideLoadingState();

@@ -213,4 +213,24 @@ chrome.commands.onCommand.addListener((command) => {
   }
 });
 
+// Keep service worker alive with periodic ping
+let keepAliveInterval;
+
+function startKeepAlive() {
+  // Ping every 20 seconds to keep service worker active
+  keepAliveInterval = setInterval(() => {
+    console.log('💓 Keep-alive ping');
+  }, 20000);
+}
+
+function stopKeepAlive() {
+  if (keepAliveInterval) {
+    clearInterval(keepAliveInterval);
+    keepAliveInterval = null;
+  }
+}
+
+// Start keep-alive on load
+startKeepAlive();
+
 console.log('🪄 Prompt Wizard background service worker loaded');
