@@ -86,18 +86,40 @@ function isPromptInput(element) {
     !element.type
   );
   
-  // Check if it's large enough to be a prompt input (not a small search box)
-  const isLargeEnough = element.offsetHeight > 40 || element.offsetWidth > 200;
+  // Platform-specific selectors for better detection
+  const platformSelectors = [
+    '.ProseMirror',           // Claude.ai
+    '[data-slate-editor]',    // Various platforms
+    '[role="textbox"]',       // Accessibility-aware inputs
+    '#prompt-textarea',       // ChatGPT
+    '[contenteditable="true"][role="textbox"]'
+  ];
   
-  return (isTextarea || isContentEditable || isInput) && isLargeEnough;
+  // Check if element matches any platform-specific selector
+  const isPlatformSpecific = platformSelectors.some(selector => {
+    try {
+      return element.matches(selector) || element.closest(selector);
+    } catch (e) {
+      return false;
+    }
+  });
+  
+  // On AI platforms, be more lenient with size requirements
+  const onAIPlatform = isAIPlatform();
+  const isLargeEnough = onAIPlatform ? 
+    (element.offsetHeight > 30 || element.offsetWidth > 150) :
+    (element.offsetHeight > 40 || element.offsetWidth > 200);
+  
+  return (isTextarea || isContentEditable || isInput || isPlatformSpecific) && isLargeEnough;
 }
 
 // Get text content from element
 function getElementText(element) {
   if (element.tagName.toLowerCase() === 'textarea' || element.tagName.toLowerCase() === 'input') {
     return element.value;
-  } else if (element.contentEditable === 'true') {
-    return element.innerText || element.textContent;
+  } else if (element.contentEditable === 'true' || element.getAttribute('contenteditable') === 'true') {
+    // For ProseMirror and similar editors, prefer innerText
+    return element.innerText || element.textContent || '';
   }
   return '';
 }
@@ -108,9 +130,21 @@ function setElementText(element, text) {
     element.value = text;
     element.dispatchEvent(new Event('input', { bubbles: true }));
     element.dispatchEvent(new Event('change', { bubbles: true }));
-  } else if (element.contentEditable === 'true') {
-    element.innerText = text;
+  } else if (element.contentEditable === 'true' || element.getAttribute('contenteditable') === 'true') {
+    // For contenteditable elements like ProseMirror
+    element.focus();
+    
+    // Try to clear and set text
+    if (element.innerText !== undefined) {
+      element.innerText = text;
+    } else {
+      element.textContent = text;
+    }
+    
+    // Trigger events that frameworks listen to
     element.dispatchEvent(new Event('input', { bubbles: true }));
+    element.dispatchEvent(new Event('change', { bubbles: true }));
+    element.dispatchEvent(new InputEvent('input', { bubbles: true, cancelable: true }));
   }
 }
 

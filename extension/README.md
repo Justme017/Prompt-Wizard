@@ -6,6 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Chrome](https://img.shields.io/badge/Chrome-Compatible-brightgreen.svg)](https://www.google.com/chrome/)
 [![Edge](https://img.shields.io/badge/Edge-Compatible-brightgreen.svg)](https://www.microsoft.com/edge)
+[![Brave](https://img.shields.io/badge/Brave-Compatible-brightgreen.svg)](https://brave.com/)
 
 ## 🎯 What is Prompt Wizard Extension?
 
@@ -16,13 +17,17 @@ Prompt Wizard is a browser extension that automatically detects when you're typi
 ### 🔍 **Auto-Detection**
 - Automatically detects text inputs on **any website**
 - Special optimization for popular AI platforms:
-  - ChatGPT (chat.openai.com)
-  - Claude (claude.ai)
+  - ChatGPT (chat.openai.com) - ✅ Fully Tested
+  - Claude (claude.ai) - ✅ Fully Tested
   - Gemini (gemini.google.com)
   - Microsoft Copilot
   - Perplexity AI
   - Poe
   - And more!
+- Detects various input types:
+  - Standard textareas
+  - Contenteditable divs (like Claude's ProseMirror editor)
+  - Text inputs with proper size filtering
 
 ### 🚀 **Smart Enhancement**
 - **Rule-Based Mode**: Free, instant enhancements (no API key needed)
@@ -60,9 +65,10 @@ Prompt Wizard is a browser extension that automatically detects when you're typi
    cd Prompt-Wizard/extension
    ```
 
-2. **Open Chrome/Edge Extensions Page**
+2. **Open Browser Extensions Page**
    - Chrome: Navigate to `chrome://extensions/`
    - Edge: Navigate to `edge://extensions/`
+   - Brave: Navigate to `brave://extensions/`
 
 3. **Enable Developer Mode**
    - Toggle "Developer mode" in the top right corner
