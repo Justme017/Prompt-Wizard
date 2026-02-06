@@ -438,6 +438,24 @@ export default function PromptWizardV2() {
           </div>
           <div className="flex items-center gap-2">
             <a
+              href="https://github.com/Justme017/Prompt-Wizard/releases/latest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 font-medium text-sm"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download Extension</span>
+            </a>
+            <a
+              href="https://github.com/Justme017/Prompt-Wizard/releases/latest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="md:hidden p-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+              title="Download Extension"
+            >
+              <Download className="w-4 h-4" />
+            </a>
+            <a
               href="https://github.com/Justme017/Prompt-Wizard"
               target="_blank"
               rel="noopener noreferrer"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Copy, Check, Moon, Sun, Settings, Brain, Zap, Lock, Unlock, Star } from 'lucide-react';
+import { Sparkles, Loader2, Copy, Check, Moon, Sun, Settings, Brain, Zap, Lock, Unlock, Star, Download } from 'lucide-react';
 
 const AI_MODELS = [
   { id: 'gemma-3-12b', name: 'Gemma 3 12B', provider: 'Google', apiModel: 'google/gemma-3-12b-it' },
@@ -231,9 +231,37 @@ export default function AdvancedPromptGenerator() {
               </p>
             </div>
           </div>
-          <button onClick={() => setDarkMode(!darkMode)} className={`p-3 rounded-lg ${card} border shadow-lg hover:shadow-xl transition-all`}>
-            {darkMode ? <Sun className="w-6 h-6 text-yellow-400" /> : <Moon className="w-6 h-6" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href="https://github.com/Justme017/Prompt-Wizard/releases/latest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 font-medium text-sm"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download Extension</span>
+            </a>
+            <a
+              href="https://github.com/Justme017/Prompt-Wizard/releases/latest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="md:hidden p-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+              title="Download Extension"
+            >
+              <Download className="w-4 h-4" />
+            </a>
+            <a
+              href="https://github.com/Justme017/Prompt-Wizard"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 md:p-3 rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 hover:rotate-12"
+            >
+              <Star className="w-4 h-4 md:w-6 md:h-6" fill="currentColor" />
+            </a>
+            <button onClick={() => setDarkMode(!darkMode)} className={`p-3 rounded-lg ${card} border shadow-lg hover:shadow-xl transition-all`}>
+              {darkMode ? <Sun className="w-6 h-6 text-yellow-400" /> : <Moon className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
