@@ -314,9 +314,10 @@ async function handleEnhance(text = null) {
   console.log('🎯 Enhancing:', originalText.substring(0, 50) + '...');
   
   // Get settings to check if AI enhancement is enabled
-  const settings = await chrome.storage.sync.get(['apiProvider', 'apiKey', 'defaultModel', 'geminiModel']);
+  const settings = await chrome.storage.sync.get(['aiModeOnly', 'apiProvider', 'apiKey', 'defaultModel', 'geminiModel']);
   
   console.log('📋 Settings:', {
+    aiModeOnly: settings.aiModeOnly,
     provider: settings.apiProvider,
     hasKey: !!settings.apiKey,
     keyLength: settings.apiKey?.length || 0,
@@ -341,12 +342,24 @@ async function handleEnhance(text = null) {
       usedMode = 'gemini';
       console.log('✅ Gemini enhancement received');
     } else {
+      // Check if AI Mode Only is enabled
+      if (settings.aiModeOnly) {
+        alert('❌ AI Mode Only is enabled but no API is configured.\n\nPlease:\n1. Click extension icon\n2. Select AI Provider (OpenRouter or Gemini)\n3. Add your API key\n\nOr disable "AI Mode Only" to use free rule-based mode.');
+        return;
+      }
       // Fallback to rule-based enhancement
       console.log('📝 Using rule-based enhancement (provider:', settings.apiProvider, ', hasKey:', hasValidKey, ')');
       enhanced = enhancePrompt(originalText);
     }
   } catch (error) {
     console.error('❌ AI enhancement failed:', error);
+    
+    // If AI Mode Only is enabled, show error and don't fallback
+    if (settings.aiModeOnly) {
+      alert('❌ AI enhancement failed: ' + error.message + '\n\nAI Mode Only is enabled. Please check your API key and try again.\n\nOr disable "AI Mode Only" in settings to use rule-based mode as fallback.');
+      return;
+    }
+    
     console.log('📝 Falling back to rule-based enhancement');
     enhanced = enhancePrompt(originalText);
     usedMode = 'rule-based';

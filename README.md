@@ -2,149 +2,234 @@
   <img src="public/1769975609060.png" alt="Prompt Wizard Banner" width="100%">
 </p>
 
-<h1 align="center">Prompt Wizard</h1>
+<h1 align="center">🪄 Prompt Wizard</h1>
 
 <p align="center">
-  <strong>Advanced AI-Powered Prompt Generator</strong>
+  <strong>AI-Powered Prompt Enhancement for ChatGPT, Claude, Gemini & More</strong>
 </p>
 
 <p align="center">
   <a href="https://prompt-wizard-seven.vercel.app">
-    <img src="https://img.shields.io/badge/Live%20Demo-Visit%20Now-blue?style=for-the-badge&logo=vercel" alt="Live Demo">
+    <img src="https://img.shields.io/badge/Web%20App-Visit%20Now-blue?style=for-the-badge&logo=vercel" alt="Web App">
+  </a>
+  <a href="https://github.com/Justme017/Prompt-Wizard/releases/latest">
+    <img src="https://img.shields.io/badge/Extension-Download-green?style=for-the-badge&logo=google-chrome" alt="Extension">
   </a>
   <a href="https://github.com/Justme017/Prompt-Wizard/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg?style=for-the-badge" alt="License">
   </a>
-  <a href="https://github.com/Justme017/Prompt-Wizard/stargazers">
-    <img src="https://img.shields.io/github/stars/Justme017/Prompt-Wizard?style=for-the-badge&logo=github" alt="GitHub stars">
-  </a>
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/github/v/release/Justme017/Prompt-Wizard?style=flat-square&logo=github" alt="Version">
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React">
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/Tailwind-3-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind">
-  <img src="https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel">
+  <img src="https://img.shields.io/badge/Chrome-Extension-4285F4?style=flat-square&logo=google-chrome&logoColor=white" alt="Chrome Extension">
+  <img src="https://img.shields.io/github/stars/Justme017/Prompt-Wizard?style=flat-square&logo=github" alt="Stars">
 </p>
 
 <p align="center">
-  A modern, AI-powered prompt optimization tool that helps you craft better prompts for various AI models. Features both free rule-based generation and AI-powered enhancement with support for multiple models and output formats.
+  Transform simple prompts into powerful AI instructions. Available as a <strong>Browser Extension</strong> and <strong>Web App</strong>.
 </p>
 
 <p align="center">
+  <a href="#-browser-extension">Extension</a> •
+  <a href="#-web-app">Web App</a> •
   <a href="#-features">Features</a> •
-  <a href="#-live-demo">Demo</a> •
-  <a href="#-installation">Installation</a> •
-  <a href="#-usage">Usage</a> •
-  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-api-support">API Support</a> •
   <a href="#-contributing">Contributing</a>
 </p>
 
 ---
 
-## ✨ Features
+## 🎯 What is Prompt Wizard?
 
-- **Hybrid Generation Modes**: Choose between free rule-based generation or AI-powered enhancement
-- **Multiple AI Models**: Support for GPT-4o, GPT-4 Turbo, Claude 3.5 Sonnet, GPT-3.5 Turbo, and Gemini Pro
-- **Smart Intent Analysis**: Automatically detects prompt intent (creative writing, coding, analytical, data science, general)
-- **Output Formats**: Generate prompts optimized for plain text, JSON, Markdown, or code
-- **Dark Mode**: Toggle between light and dark themes with smooth transitions
-- **Real-time Token Counting**: See token usage estimates for input and output
-- **Copy to Clipboard**: Easily copy enhanced prompts
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Vercel-Ready**: Deploy instantly with no backend configuration needed
+Prompt Wizard enhances your AI prompts with structured formatting, context, and requirements - making your AI interactions more effective and productive. Like Grammarly, but for AI prompts!
 
-## 🚀 Live Demo
+### Two Ways to Use:
 
-**Try it now:** [https://prompt-wizard-seven.vercel.app](https://prompt-wizard-seven.vercel.app)
-
-![Demo](https://img.shields.io/badge/Status-Online-success?style=flat-square)
+1. **🔌 Browser Extension** - Enhance prompts directly on ChatGPT, Claude, Gemini (Recommended)
+2. **🌐 Web Application** - Standalone tool for prompt generation and management
 
 ---
 
-## 📚 Table of Contents
+## 🔌 Browser Extension
 
-- [Features](#-features)
-- [Live Demo](#-live-demo)
-- [Tech Stack](#️-tech-stack)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Generation Modes](#-generation-modes)
-- [Project Structure](#-project-structure)
-- [Deployment](#-deployment)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Author](#-author)
+### ✨ Features
 
----
+- **Auto-Detect**: Floating enhancement button appears on AI chat platforms
+- **Multiple Triggers**: 
+  - ✨ Click the floating button
+  - 🖱️ Right-click → "Enhance Prompt"
+  - ⌨️ Keyboard shortcut: `Ctrl+Shift+E` (Windows/Linux) or `Cmd+Shift+E` (Mac)
+- **Works Everywhere**: ChatGPT, Claude.ai, Google Gemini, Microsoft Copilot, and ALL websites
+- **Instant Enhancement**: Rule-based mode works offline, no API needed
+- **AI-Powered** (Optional): Supports OpenRouter & Google Gemini APIs
+- **No Login Required**: Works immediately after installation
+- **Privacy-First**: All processing happens locally, no data collection
 
-## 🛠️ Tech Stack
+### 📦 Installation
 
-- **Frontend**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS with custom dark mode support
-- **Icons**: Lucide React
-- **Deployment**: Vercel with serverless functions
-- **AI Integration**: OpenRouter API for AI-powered generation
+#### Option 1: Download from Releases (Easiest)
 
-## 📦 Installation
+1. **Download the Extension**
+   - Go to [**Releases Page**](https://github.com/Justme017/Prompt-Wizard/releases/latest)
+   - Download `prompt-wizard-extension-v3.2.0.zip`
+   - Extract the ZIP file to a folder on your computer
 
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-- Git
-
-### Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Justme017/Prompt-Wizard.git
-   cd Prompt-Wizard
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
+2. **Install in Your Browser**
    
-   Navigate to `http://localhost:5173`
+   **For Chrome / Brave / Edge / Opera:**
+   ```
+   1. Open chrome://extensions (or brave://extensions, edge://extensions)
+   2. Enable "Developer mode" (toggle in top-right corner)
+   3. Click "Load unpacked" button
+   4. Select the extracted 'extension' folder
+   5. Done! The extension icon should appear in your toolbar 🎉
+   ```
+
+   **For Firefox:**
+   ```
+   1. Open about:debugging#/runtime/this-firefox
+   2. Click "Load Temporary Add-on"
+   3. Navigate to the extension folder and select manifest.json
+   4. Note: Temporary add-ons are removed when Firefox closes
+   ```
+
+#### Option 2: Build from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/Justme017/Prompt-Wizard.git
+cd Prompt-Wizard
+
+# The extension is already built in the 'extension' folder
+# Just load it as an unpacked extension (see Option 1, Step 2)
+```
+
+### 🚀 How to Use the Extension
+
+1. **Visit any AI chat platform** (ChatGPT, Claude, Gemini, etc.)
+2. **Type your prompt** in the text box
+3. **Enhancement Options:**
+   - Wait for the ✨ floating button to appear → Click it
+   - Or select your text → Right-click → "Enhance Prompt"
+   - Or select your text → Press `Ctrl+Shift+E`
+4. **Review** the enhanced prompt in the modal
+5. **Copy or Apply** the enhancement to your input
+
+### ⚙️ Extension Settings
+
+Click the extension icon in your toolbar to:
+- Toggle auto-detection on/off
+- Select AI provider (None, OpenRouter, Gemini)
+- Add API keys for AI-powered enhancement
+- Choose your preferred AI model
+- View usage statistics
+
+### 🔑 API Setup (Optional)
+
+For AI-powered enhancement:
+
+**OpenRouter:**
+1. Get free API key: [openrouter.ai/keys](https://openrouter.ai/keys)
+2. Open extension settings
+3. Select "OpenRouter" provider
+4. Paste your key (format: `sk-or-...`)
+5. Choose model (Gemma 3 12B is free!)
+
+**Google Gemini:**
+1. Get free API key: [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+2. Open extension settings
+3. Select "Gemini" provider
+4. Paste your key (format: `AIza...`)
+5. Choose model (1.5 Flash is fast & free!)
 
 ---
 
-## 💡 Usage
+## 🌐 Web App
 
-### Free Rule-Based Mode
+**Live Demo:** [https://prompt-wizard-seven.vercel.app](https://prompt-wizard-seven.vercel.app)
 
-1. Enter your prompt in the text area
-2. Select your desired output format (Plain Text, JSON, Markdown, Code)
-3. Click "Generate Enhanced Prompt"
-4. Copy the enhanced prompt to use with any AI model
+### ✨ Features
 
-### AI-Powered Mode
+- **Hybrid Generation Modes**: Rule-based (free) or AI-powered
+- **Multiple AI Models**: GPT-4o, Claude 3.5 Sonnet, Gemini Pro, and more
+- **Smart Intent Analysis**: Automatically detects prompt type
+- **Output Formats**: Plain Text, JSON, Markdown, Code
+- **Dark Mode**: Beautiful light/dark theme support
+- **Prompt History**: Save and manage your enhanced prompts
+- **Templates**: Pre-built prompts for common tasks
+- **Export/Import**: Backup your prompt library
+- **Token Counting**: Real-time token usage estimates
+- **Responsive Design**: Works on all devices
 
-1. Get your free API key from [OpenRouter](https://openrouter.ai/keys)
-2. Enter the API key in the configuration section
-3. Toggle to "AI-Powered Mode"
-4. Select your preferred AI model (GPT-4o, Claude 3.5, Gemini Pro, etc.)
-5. Enter your prompt and generate
+### 💻 Local Development
 
-### Skills Quick-Start
+```bash
+# Clone the repository
+git clone https://github.com/Justme017/Prompt-Wizard.git
+cd Prompt-Wizard
 
-Use the "Add Skill to Chat" dropdown to instantly copy pre-configured prompts for:
-- 🎨 Image Generation
-- 🎵 Audio Generation  
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Open http://localhost:5173
+```
+
+### 🏗️ Build for Production
+
+```bash
+npm run build
+```
+
+### 🚀 Deploy Your Own
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Justme017/Prompt-Wizard)
+
+Or manually:
+```bash
+npm run build
+npx vercel --prod
+```
+
+---
+
+## 🎨 Features
+
+### 🎯 Smart Intent Detection
+
+Automatically analyzes your prompt to determine the best enhancement:
+
+| Intent | Description | Examples |
+|--------|-------------|----------|
+| 🎨 **Creative Writing** | Stories, articles, content | "Write a sci-fi story about AI" |
+| 💻 **Coding** | Scripts, algorithms, debugging | "Create a Python web scraper" |
+| 📊 **Analytical** | Research, evaluation | "Analyze market trends in AI" |
+| 📈 **Data Science** | Visualization, analysis | "Create a sales dashboard" |
+| ✉️ **Communication** | Emails, messages | "Write a professional email" |
+| 👨‍🏫 **Educational** | Tutorials, explanations | "Explain quantum computing" |
+| 🔍 **Research** | Investigation, findings | "Research renewable energy" |
+| 🌐 **General** | Everything else | "Plan a trip to Japan" |
+
+### ⚙️ Output Formats
+
+- 📝 **Plain Text**: Simple, readable format
+- 🔗 **JSON**: Structured data format
+- 📄 **Markdown**: Formatted documentation
+- 💻 **Code**: Programming-specific format
+
+### 🎁 Quick-Start Skills (Web App)
+
+Pre-configured prompts for instant use:
+- 🎨 Image Generation (DALL-E, Midjourney)
+- 🎵 Audio Generation
 - 🎬 Video Generation
 - ✉️ Email Writing
-- 🔍 Research
+- 🔍 Research Assistant
 - 👶 ELI5 Explanations
 - 📊 Data Analysis
 - 💻 Code Review
@@ -155,88 +240,89 @@ Use the "Add Skill to Chat" dropdown to instantly copy pre-configured prompts fo
 
 ---
 
-## 🏗️ Build for Production
+## 🔌 API Support
 
-```bash
-npm run build
-```
+### Supported Providers
 
-## 🚀 Deployment
+| Provider | Models | Free Tier | Get Key |
+|----------|--------|-----------|---------|
+| **OpenRouter** | 200+ models including GPT-4, Claude, Llama | ✅ Yes (Gemma, Mixtral) | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| **Google Gemini** | Gemini 1.5 Flash, Pro, 2.0 | ✅ Yes (15 RPM) | [aistudio.google.com](https://aistudio.google.com/app/apikey) |
 
-### Deploy to Vercel (Recommended)
+### Using APIs
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Justme017/Prompt-Wizard)
+**Extension:**
+1. Click extension icon
+2. Select AI Provider
+3. Enter API key
+4. Choose model
+5. Start enhancing!
 
-**Manual Deployment:**
+**Web App:**
+1. Toggle "Use AI-Powered Mode"
+2. Enter API key
+3. Select model
+4. Generate enhanced prompts
 
-```bash
-# Build the project
-npm run build
+---
 
-# Deploy to Vercel
-npx vercel --prod
-```
+## 🛠️ Tech Stack
 
-### Environment Variables
+### Browser Extension
+- **Manifest V3**: Modern Chrome extension architecture
+- **Vanilla JavaScript**: Lightweight, no framework overhead
+- **Chrome Storage API**: Settings persistence
+- **Context Menus**: Right-click integration
+- **Keyboard Commands**: Shortcut support
 
-No environment variables required for the free mode. For AI-powered mode, users provide their own OpenRouter API keys directly in the UI.
+### Web Application
+- **Frontend**: React 18 with TypeScript
+- **Build Tool**: Vite 5
+- **Styling**: Tailwind CSS 3
+- **Icons**: Lucide React
+- **Deployment**: Vercel
+- **State Management**: React Hooks
 
 ---
 
 ## 📁 Project Structure
 
 ```
-src/
-├── components/
-│   └── PromptEnhancer.tsx          # Main AdvancedPromptGenerator component
-├── pages/
-│   ├── Index.tsx                   # Home page
-│   └── NotFound.tsx                # 404 page
-├── hooks/                          # Custom React hooks
-├── lib/                           # Utility functions
-└── main.tsx                       # Application entry point
-
-public/                            # Static assets
+Prompt-Wizard/
+├── extension/              # 🔌 Browser Extension
+│   ├── manifest.json      # Extension configuration
+│   ├── background.js      # Service worker
+│   ├── content.js         # Main enhancement logic
+│   ├── content.css        # Extension styles
+│   ├── popup.html         # Settings UI
+│   ├── popup.js           # Settings logic
+│   └── icons/             # Extension icons
+│
+├── src/                   # 🌐 Web Application
+│   ├── components/        # React components
+│   │   ├── PromptWizardV2.tsx
+│   │   ├── PromptEnhancer.tsx
+│   │   └── ui/           # UI components
+│   ├── pages/            # Page components
+│   ├── hooks/            # Custom hooks
+│   └── lib/              # Utilities
+│
+├── public/               # Static assets
+└── docs/                 # Documentation
 ```
 
-## 🎨 Features Overview
+---
 
-### Generation Modes
+## 📈 Roadmap
 
-#### ⚡ Free Rule-Based Mode
-- ✅ Instant generation with no API costs
-- ✅ Smart intent analysis and context-aware prompt structuring
-- ✅ Optimized for different content types (writing, coding, analysis, etc.)
-- ✅ No sign-up required
-
-#### 🤖 AI-Powered Mode
-- 🚀 Uses OpenRouter API for intelligent prompt enhancement
-- 🔑 Requires API key from [openrouter.ai](https://openrouter.ai/keys)
-- 🧠 Advanced prompt engineering with AI assistance
-- 🎯 Supports multiple AI models:
-  - **OpenAI**: GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo
-  - **Anthropic**: Claude 3.5 Sonnet
-  - **Google**: Gemini Pro, Gemma 3 12B (default)
-
-### 🎯 Smart Intent Detection
-
-The tool automatically analyzes your prompt to determine the intent:
-
-| Intent | Description | Examples |
-|--------|-------------|----------|
-| 🎨 **Creative Writing** | Stories, articles, narratives | "Write a sci-fi story" |
-| 💻 **Coding** | Scripts, programs, algorithms | "Create a Python script" |
-| 📊 **Analytical** | Research, evaluation, comparison | "Analyze market trends" |
-| 📈 **Data Science** | Visualization, plotting, analysis | "Create a data dashboard" |
-| 🌐 **General** | All other types of prompts | "Explain quantum physics" |
-
-### ⚙️ Output Formats
-
-Choose from multiple output formats for your enhanced prompts:
-- 📝 **Plain Text**: Simple, readable format
-- 🔗 **JSON**: Structured data format
-- 📄 **Markdown**: Formatted documentation
-- 💻 **Code**: Programming-specific format
+- [ ] Chrome Web Store publication
+- [ ] Firefox Add-ons publication
+- [ ] GPT Store integration
+- [ ] Claude Code integration
+- [ ] More AI provider support
+- [ ] Prompt templates marketplace
+- [ ] Collaborative prompt editing
+- [ ] Advanced analytics dashboard
 
 ---
 
@@ -258,6 +344,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - Write clear commit messages
 - Update documentation as needed
 - Test your changes thoroughly
+- For extension changes, test on multiple browsers
 
 ---
 
@@ -277,6 +364,20 @@ Under the following terms:
 
 ---
 
+## 🙏 Acknowledgments
+
+Special thanks to:
+
+- 🎨 [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- ⚡ [Vite](https://vitejs.dev/) - Next generation frontend tooling
+- ⚛️ [React](https://react.dev/) - JavaScript library for building user interfaces
+- 🚀 [Vercel](https://vercel.com/) - Deployment and hosting
+- 🎭 [Lucide](https://lucide.dev/) - Beautiful icons
+- 🤖 [OpenRouter](https://openrouter.ai/) - Unified API for AI models
+- 🧠 [Google AI](https://ai.google.dev/) - Gemini API access
+
+---
+
 ## 👨‍💻 Author
 
 <p align="center">
@@ -289,47 +390,12 @@ Under the following terms:
 
 ---
 
-## 🙏 Acknowledgments
-
-Special thanks to:
-
-- 🎨 [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-- ⚡ [Vite](https://vitejs.dev/) - Next generation frontend tooling
-- ⚛️ [React](https://react.dev/) - JavaScript library for building user interfaces
-- 🚀 [Vercel](https://vercel.com/) - Deployment and hosting platform
-- 🎭 [Lucide](https://lucide.dev/) - Beautiful & consistent icons
-- 🤖 [OpenRouter](https://openrouter.ai/) - Unified API for multiple AI models
-
----
-
 ## 📊 Stats
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/Justme017/Prompt-Wizard?style=flat-square)
 ![GitHub language count](https://img.shields.io/github/languages/count/Justme017/Prompt-Wizard?style=flat-square)
 ![GitHub top language](https://img.shields.io/github/languages/top/Justme017/Prompt-Wizard?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Justme017/Prompt-Wizard?style=flat-square)
-
----
-
-## ⚙️ Repository Setup
-
-### About Section
-To complete your GitHub repository setup, update the **About** section with:
-
-**Description:**
-```
-Advanced AI-powered prompt generator with hybrid modes, multiple AI models, and smart intent detection. Built with React, TypeScript, and Tailwind CSS.
-```
-
-**Website:**
-```
-https://prompt-wizard-seven.vercel.app
-```
-
-**Topics:**
-```
-ai, prompt-engineering, openrouter, react, typescript, vite, tailwind-css, prompt-generator, llm, gpt-4, claude, gemini, ai-tools, prompt-optimization, vercel, openai, anthropic, google-ai, developer-tools, productivity
-```
 
 ---
 

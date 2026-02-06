@@ -5,6 +5,7 @@ async function loadSettings() {
   const settings = await chrome.storage.sync.get({
     autoDetect: true,
     showNotifications: true,
+    aiModeOnly: false,
     apiProvider: 'none',
     defaultModel: 'gemma-3-12b',
     geminiModel: 'gemini-1.5-flash',
@@ -16,6 +17,7 @@ async function loadSettings() {
   // Update UI
   document.getElementById('toggle-auto-detect').classList.toggle('active', settings.autoDetect);
   document.getElementById('toggle-notifications').classList.toggle('active', settings.showNotifications);
+  document.getElementById('toggle-ai-mode').classList.toggle('active', settings.aiModeOnly);
   document.getElementById('api-provider').value = settings.apiProvider;
   document.getElementById('default-model').value = settings.defaultModel;
   document.getElementById('gemini-model').value = settings.geminiModel;
@@ -179,6 +181,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('toggle-notifications').addEventListener('click', function() {
     this.classList.toggle('active');
     saveSetting('showNotifications', this.classList.contains('active'));
+  });
+
+  document.getElementById('toggle-ai-mode').addEventListener('click', function() {
+    this.classList.toggle('active');
+    const isActive = this.classList.contains('active');
+    saveSetting('aiModeOnly', isActive);
+    
+    // Show warning if AI mode enabled but no API configured
+    if (isActive) {
+      const provider = document.getElementById('api-provider').value;
+      const apiKey = document.getElementById('api-key').value;
+      if (provider === 'none' || !apiKey) {
+        alert('⚠️ AI Mode Only requires an API provider and key. Please configure below.');
+      }
+    }
   });
 
   // Model selection
