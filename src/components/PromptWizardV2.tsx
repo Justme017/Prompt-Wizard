@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, Loader2, Copy, Check, Moon, Sun, Settings, Brain, Zap, Unlock, Star,
   History, Save, Download, FileText, Code2, FileJson, Plus, Trash2, BookOpen,
-  GitCompare, Link2, Play, Variable, Globe, ChevronDown, ChevronUp
+  GitCompare, Link2, Play, Variable, Globe, ChevronDown, ChevronUp, GraduationCap, Layers
 } from 'lucide-react';
 
 // Extended AI Models with more providers
@@ -298,6 +298,13 @@ export default function PromptWizardV2() {
   });
   const [variables, setVariables] = useState({});
   const [showHistory, setShowHistory] = useState(false);
+
+  // Stepped Learning state
+  const [learningTopic, setLearningTopic] = useState('');
+  const [stepsCount, setStepsCount] = useState(5);
+  const [difficultyLevel, setDifficultyLevel] = useState('beginner');
+  const [learningSteps, setLearningSteps] = useState([]);
+  const [generatingSteps, setGeneratingSteps] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showVariables, setShowVariables] = useState(false);
@@ -468,6 +475,112 @@ export default function PromptWizardV2() {
     }
   };
 
+  const generateLearningSteps = async () => {
+    if (!learningTopic.trim()) {
+      setError('Please enter a learning topic');
+      return;
+    }
+
+    setGeneratingSteps(true);
+    setError('');
+
+    try {
+      const steps = [];
+      
+      if (useAPI && apiKey.trim()) {
+        // Use AI to generate learning steps
+        const prompt = `Generate ${stepsCount} progressive learning steps for: "${learningTopic}". 
+Difficulty level: ${difficultyLevel}. 
+For each step, provide:
+1. Step title
+2. Learning objective
+3. Key concepts to cover
+4. Practical exercise or task
+5. Expected outcome
+
+Format as JSON array with fields: step, title, objective, concepts, exercise, outcome`;
+
+        const model = AI_MODELS.find(m => m.id === 'gemma-3-12b');
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': 'https://prompt-wizard-seven.vercel.app',
+            'X-Title': 'Prompt Wizard V2'
+          },
+          body: JSON.stringify({
+            model: model.apiModel,
+            messages: [
+              { role: 'system', content: 'You are an expert instructional designer creating progressive learning paths.' },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.7,
+            max_tokens: 2000
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const content = data.choices[0].message.content;
+          try {
+            const parsed = JSON.parse(content);
+            setLearningSteps(Array.isArray(parsed) ? parsed : []);
+          } catch {
+            // Fallback if not JSON
+            const generatedSteps = [];
+            for (let i = 0; i < stepsCount; i++) {
+              generatedSteps.push({
+                step: i + 1,
+                title: `Step ${i + 1}`,
+                objective: `Learn core concepts of ${learningTopic}`,
+                concepts: ['Foundation', 'Practice', 'Application'],
+                exercise: content.substring(i * 100, (i + 1) * 100),
+                outcome: `Understanding of step ${i + 1}`
+              });
+            }
+            setLearningSteps(generatedSteps);
+          }
+        } else {
+          throw new Error('API request failed');
+        }
+      } else {
+        // Rule-based step generation
+        const difficulties = {
+          beginner: ['Introduction', 'Basic Concepts', 'Simple Practice', 'Guided Examples', 'Review'],
+          intermediate: ['Foundation Review', 'Advanced Concepts', 'Complex Problems', 'Real-world Applications', 'Integration'],
+          advanced: ['Mastery Prerequisites', 'Expert Techniques', 'Complex Scenarios', 'Optimization', 'Innovation']
+        };
+
+        for (let i = 0; i < stepsCount; i++) {
+          const stepTemplates = difficulties[difficultyLevel] || difficulties.beginner;
+          steps.push({
+            step: i + 1,
+            title: `${stepTemplates[i % stepTemplates.length]}: ${learningTopic}`,
+            objective: `Master ${difficultyLevel}-level understanding of ${learningTopic} at step ${i + 1}`,
+            concepts: [
+              `Core principle ${i + 1}`,
+              `Key technique ${i + 1}`,
+              `Application method ${i + 1}`
+            ],
+            exercise: `Practice exercise: Apply ${learningTopic} concepts from step ${i + 1} to solve real-world problems. Create 3 examples demonstrating your understanding.`,
+            outcome: `By completing this step, you will understand ${learningTopic} at a ${difficultyLevel} level for step ${i + 1} and be ready to progress.`
+          });
+        }
+        setLearningSteps(steps);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to generate learning steps');
+    } finally {
+      setGeneratingSteps(false);
+    }
+  };
+
+  const copyLearningStep = (step) => {
+    const content = `# ${step.title}\n\n## Objective\n${step.objective}\n\n## Concepts\n${step.concepts.join(', ')}\n\n## Exercise\n${step.exercise}\n\n## Expected Outcome\n${step.outcome}`;
+    navigator.clipboard.writeText(content);
+  };
+
   // Theme classes
   const bg = darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-cyan-50 via-teal-50 to-blue-50';
   const card = darkMode ? 'bg-gray-800' : 'bg-white';
@@ -572,6 +685,17 @@ export default function PromptWizardV2() {
           >
             <Save className="w-4 h-4 inline mr-2" />
             Saved ({savedPrompts.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('learning')}
+            className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
+              activeTab === 'learning'
+                ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white'
+                : `${text} ${hoverCard}`
+            }`}
+          >
+            <GraduationCap className="w-4 h-4 inline mr-2" />
+            Stepped Learning
           </button>
         </div>
 
@@ -952,6 +1076,146 @@ export default function PromptWizardV2() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Stepped Learning Tab */}
+        {activeTab === 'learning' && (
+          <div className="space-y-6">
+            {/* Learning Configuration */}
+            <div className={`${card} border rounded-xl shadow-lg p-6`}>
+              <div className="flex items-center gap-2 mb-4">
+                <GraduationCap className="w-5 h-5 text-teal-600" />
+                <h2 className={`text-lg font-semibold ${text}`}>Create Learning Path</h2>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${text}`}>Learning Topic</label>
+                  <input
+                    type="text"
+                    value={learningTopic}
+                    onChange={(e) => setLearningTopic(e.target.value)}
+                    placeholder="e.g., Python Programming, Machine Learning, Web Development..."
+                    className={`w-full px-4 py-2 rounded-lg border ${inputClass}`}
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${text}`}>Number of Steps</label>
+                    <input
+                      type="number"
+                      min="3"
+                      max="10"
+                      value={stepsCount}
+                      onChange={(e) => setStepsCount(parseInt(e.target.value))}
+                      className={`w-full px-4 py-2 rounded-lg border ${inputClass}`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${text}`}>Difficulty Level</label>
+                    <select
+                      value={difficultyLevel}
+                      onChange={(e) => setDifficultyLevel(e.target.value)}
+                      className={`w-full px-4 py-2 rounded-lg border ${inputClass}`}
+                    >
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  onClick={generateLearningSteps}
+                  disabled={generatingSteps || !learningTopic.trim()}
+                  className="w-full py-3 px-6 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                >
+                  {generatingSteps ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Generating Learning Path...
+                    </>
+                  ) : (
+                    <>
+                      <Layers className="w-5 h-5" />
+                      Generate Learning Steps
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Generated Steps */}
+            {learningSteps.length > 0 && (
+              <div className={`${card} border rounded-xl shadow-lg p-6`}>
+                <h2 className={`text-xl font-bold ${text} mb-4`}>Learning Path: {learningTopic}</h2>
+                <div className="space-y-4">
+                  {learningSteps.map((step, index) => (
+                    <div key={index} className={`${card} border-2 rounded-lg p-4 border-teal-200 dark:border-teal-800`}>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white flex items-center justify-center font-bold text-sm">
+                            {step.step}
+                          </div>
+                          <h3 className={`font-bold ${text}`}>{step.title}</h3>
+                        </div>
+                        <button
+                          onClick={() => copyLearningStep(step)}
+                          className="p-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 transition-all"
+                          title="Copy step"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <span className={`text-sm font-semibold ${text}`}>📋 Objective:</span>
+                          <p className={`text-sm ${textSec} mt-1`}>{step.objective}</p>
+                        </div>
+
+                        <div>
+                          <span className={`text-sm font-semibold ${text}`}>💡 Key Concepts:</span>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {step.concepts.map((concept, i) => (
+                              <span key={i} className="text-xs px-2 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300">
+                                {concept}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className={`text-sm font-semibold ${text}`}>✏️ Exercise:</span>
+                          <p className={`text-sm ${textSec} mt-1`}>{step.exercise}</p>
+                        </div>
+
+                        <div>
+                          <span className={`text-sm font-semibold ${text}`}>🎯 Expected Outcome:</span>
+                          <p className={`text-sm ${textSec} mt-1`}>{step.outcome}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {learningSteps.length === 0 && !generatingSteps && (
+              <div className={`${card} border rounded-xl shadow-lg p-12`}>
+                <div className="text-center">
+                  <GraduationCap className={`w-16 h-16 mx-auto mb-4 ${textSec}`} />
+                  <h3 className={`text-lg font-semibold ${text} mb-2`}>Create Your Learning Path</h3>
+                  <p className={`${textSec}`}>
+                    Enter a topic above and generate a structured, step-by-step learning path
+                    tailored to your difficulty level.
+                  </p>
+                </div>
               </div>
             )}
           </div>
