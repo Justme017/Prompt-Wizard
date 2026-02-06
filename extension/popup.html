@@ -280,7 +280,7 @@
   <div class="header">
     <div class="logo">🪄</div>
     <h1>Prompt Wizard</h1>
-    <div class="version">V3 - Browser Extension</div>
+    <div class="version">V3.2 - OpenRouter & Gemini Support</div>
   </div>
 
   <div class="content">
@@ -307,6 +307,15 @@
       </div>
 
       <div class="input-group">
+        <label>AI Provider (Optional)</label>
+        <select id="api-provider">
+          <option value="none">None (Rule-based only)</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="gemini">Google Gemini</option>
+        </select>
+      </div>
+
+      <div class="input-group" id="model-selector" style="display: none;">
         <label>Default AI Model</label>
         <select id="default-model">
           <option value="gemma-3-12b">Gemma 3 12B (Free)</option>
@@ -318,15 +327,24 @@
         </select>
       </div>
 
-      <div class="input-group">
-        <label>OpenRouter API Key (Optional)</label>
+      <div class="input-group" id="gemini-model-selector" style="display: none;">
+        <label>Gemini Model</label>
+        <select id="gemini-model">
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Free)</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro (Advanced)</option>
+          <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Experimental)</option>
+        </select>
+      </div>
+
+      <div class="input-group" id="api-key-group" style="display: none;">
+        <label id="api-key-label">API Key</label>
         <div style="position: relative;">
-          <input type="password" id="api-key" placeholder="sk-or-..." style="padding-right: 35px;">
+          <input type="password" id="api-key" placeholder="" style="padding-right: 35px;">
           <div id="api-verify-status" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 16px; display: none;">
             <span id="verify-icon"></span>
           </div>
         </div>
-        <small id="api-key-help" style="font-size: 11px; opacity: 0.8; display: block; margin-top: 4px;">Free tier available. Get key from <a href="https://openrouter.ai/keys" target="_blank" style="color: #fff; text-decoration: underline;">openrouter.ai</a></small>
+        <small id="api-key-help" style="font-size: 11px; opacity: 0.8; display: block; margin-top: 4px;"></small>
       </div>
     </div>
 
