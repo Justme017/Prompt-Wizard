@@ -1,4 +1,77 @@
-// Background service worker for Prompt Wizard Extension
+// Background service worker for Prompt Wizard Extension - Simplified
+// All enhancement logic now runs in content script for reliability
+
+console.log('🪄 Prompt Wizard background worker initialized');
+
+// Install listener
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    console.log('✅ Prompt Wizard installed!');
+    
+    // Initialize default settings
+    chrome.storage.sync.set({
+      autoDetect: true,
+      showNotifications: true,
+      defaultModel: 'gemma-3-12b',
+      apiKey: '',
+      promptsEnhanced: 0,
+      timeSaved: 0
+    });
+  }
+  
+  // Create context menu
+  chrome.contextMenus.create({
+    id: 'enhance-prompt',
+    title: '✨ Enhance with Prompt Wizard',
+    contexts: ['selection', 'editable']
+  });
+});
+
+// Context menu click
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === 'enhance-prompt') {
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'enhanceFromContextMenu',
+      text: info.selectionText || ''
+    });
+  }
+});
+
+// Keyboard shortcut
+chrome.commands.onCommand.addListener((command) => {
+  if (command === 'enhance-prompt') {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: 'enhanceFromKeyboard'
+        });
+      }
+    });
+  }
+});
+
+// Simple message handling - just pass through to content script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log('📨 Background received:', request.action);
+  
+  if (request.action === 'ping') {
+    sendResponse({ success: true, status: 'active' });
+    return false;
+  }
+  
+  if (request.action === 'updateStats') {
+    chrome.storage.sync.get(['promptsEnhanced', 'timeSaved'], (data) => {
+      chrome.storage.sync.set({
+        promptsEnhanced: (data.promptsEnhanced || 0) + 1,
+        timeSaved: (data.timeSaved || 0) + 60
+      });
+    });
+    sendResponse({ success: true });
+    return false;
+  }
+  
+  return false;
+});
 
 // Listen for installation
 chrome.runtime.onInstalled.addListener((details) => {

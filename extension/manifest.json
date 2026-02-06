@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Prompt Wizard - AI Prompt Enhancer",
-  "version": "3.0.0",
-  "description": "Enhance your AI prompts automatically. Works with ChatGPT, Claude, Gemini, and more. Like Grammarly for AI prompts.",
+  "version": "3.2.0",
+  "description": "Enhance your AI prompts automatically. Works with ChatGPT, Claude, Gemini, and more. Supports OpenRouter & Google Gemini APIs.",
   "permissions": [
     "activeTab",
     "storage",

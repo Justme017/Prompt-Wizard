@@ -1,447 +1,372 @@
-// Prompt Wizard Extension - Content Script
-// Detects text inputs and offers prompt enhancement like Grammarly
+// 🪄 Prompt Wizard - Simplified & Reliable
+// Multiple Ways to Enhance: Auto-detect Button | Right-click | Ctrl+Shift+E
 
-let currentActiveElement = null;
-let enhancerButton = null;
-let isProcessing = false;
+console.log('🪄 Prompt Wizard loaded!');
 
-// Supported AI platforms
-const AI_PLATFORMS = {
-  'chat.openai.com': 'ChatGPT',
-  'claude.ai': 'Claude',
-  'gemini.google.com': 'Gemini',
-  'copilot.microsoft.com': 'Copilot',
-  'chat.mistral.ai': 'Mistral',
-  'poe.com': 'Poe',
-  'perplexity.ai': 'Perplexity',
-  'huggingface.co/chat': 'HuggingChat'
+// ==========================================
+// ENHANCEMENT ENGINE (Runs Locally - No Service Worker Issues!)
+// ==========================================
+
+const SKILLS = {
+  creative: { name: 'Creative Writer & Storyteller', keywords: /write|story|creative|narrative|blog|article|essay/i },
+  code: { name: 'Senior Software Engineer', keywords: /code|program|function|script|debug|api|implement|refactor/i },
+  data: { name: 'Data Analyst', keywords: /analyze|data|chart|graph|statistics|metrics/i },
+  business: { name: 'Business Strategist', keywords: /business|strategy|market|sales|roi|profit/i },
+  research: { name: 'Research Analyst', keywords: /research|study|investigate|findings|evidence/i },
+  teacher: { name: 'Expert Educator', keywords: /teach|explain|learn|tutorial|guide/i },
+  email: { name: 'Communication Specialist', keywords: /email|message|correspondence|letter/i },
+  general: { name: 'Expert Assistant', keywords: /.*/ }
 };
 
-// Detect if we're on a supported AI platform
-const isAIPlatform = () => {
-  const hostname = window.location.hostname;
-  return Object.keys(AI_PLATFORMS).some(domain => hostname.includes(domain));
-};
+function detectSkill(text) {
+  for (const [key, skill] of Object.entries(SKILLS)) {
+    if (skill.keywords.test(text)) return skill.name;
+  }
+  return SKILLS.general.name;
+}
 
-// Create the enhancement button (like Grammarly's icon)
-function createEnhancerButton() {
-  const button = document.createElement('div');
-  button.id = 'prompt-wizard-enhancer-btn';
-  button.className = 'pw-enhancer-button';
-  button.innerHTML = `
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span>Enhance</span>
-  `;
-  button.title = 'Enhance with Prompt Wizard';
+function enhancePrompt(originalText) {
+  const skill = detectSkill(originalText);
   
-  button.addEventListener('click', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    enhanceCurrentPrompt();
+  return `**ROLE:** ${skill}
+
+**OBJECTIVE:**
+Provide a comprehensive, well-structured response that directly addresses the user's request with exceptional clarity and depth.
+
+**CONTEXT:**
+User Request: "${originalText}"
+
+**REQUIREMENTS:**
+• Structure the response with clear sections and logical flow
+• Provide specific, actionable examples and insights
+• Use appropriate formatting (headings, lists, code blocks) for maximum readability
+• Ensure accuracy, completeness, and professional quality
+• Include relevant context and background information
+• Conclude with practical next steps or recommendations
+
+**EXPECTED OUTPUT:**
+A detailed, expert-level response that fully satisfies the request while maintaining engagement and clarity.`;
+}
+
+// AI Enhancement (OpenRouter)
+async function enhanceWithOpenRouter(text, apiKey, model) {
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': window.location.href
+    },
+    body: JSON.stringify({
+      model: `openrouter/auto`,
+      messages: [{
+        role: 'system',
+        content: 'You are an expert prompt engineer. Transform user prompts into detailed, structured prompts following the ROLE-OBJECTIVE-CONTEXT-REQUIREMENTS format.'
+      }, {
+        role: 'user',
+        content: `Enhance this prompt: "${text}"`
+      }],
+      temperature: 0.7,
+      max_tokens: 1000
+    })
   });
-  
-  return button;
-}
 
-// Position the enhancer button near the text input
-function positionEnhancerButton(element) {
-  if (!enhancerButton) {
-    enhancerButton = createEnhancerButton();
-    document.body.appendChild(enhancerButton);
+  if (!response.ok) {
+    throw new Error(`OpenRouter API error: ${response.status}`);
   }
-  
-  const rect = element.getBoundingClientRect();
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-  
-  // Position in bottom-right corner of the text input
-  enhancerButton.style.position = 'absolute';
-  enhancerButton.style.top = `${rect.bottom + scrollTop - 40}px`;
-  enhancerButton.style.left = `${rect.right + scrollLeft - 120}px`;
-  enhancerButton.style.display = 'flex';
-  enhancerButton.style.zIndex = '999999';
+
+  const data = await response.json();
+  return data.choices[0].message.content;
 }
 
-// Hide the enhancer button
-function hideEnhancerButton() {
-  if (enhancerButton) {
-    enhancerButton.style.display = 'none';
-  }
-}
-
-// Check if element is a text input suitable for prompts
-function isPromptInput(element) {
-  if (!element) return false;
-  
-  const tagName = element.tagName.toLowerCase();
-  const isTextarea = tagName === 'textarea';
-  const isContentEditable = element.contentEditable === 'true';
-  const isInput = tagName === 'input' && (
-    element.type === 'text' || 
-    element.type === 'search' ||
-    !element.type
-  );
-  
-  // Platform-specific selectors for better detection
-  const platformSelectors = [
-    '.ProseMirror',           // Claude.ai
-    '[data-slate-editor]',    // Various platforms
-    '[role="textbox"]',       // Accessibility-aware inputs
-    '#prompt-textarea',       // ChatGPT
-    '[contenteditable="true"][role="textbox"]'
-  ];
-  
-  // Check if element matches any platform-specific selector
-  const isPlatformSpecific = platformSelectors.some(selector => {
-    try {
-      return element.matches(selector) || element.closest(selector);
-    } catch (e) {
-      return false;
-    }
-  });
-  
-  // On AI platforms, be more lenient with size requirements
-  const onAIPlatform = isAIPlatform();
-  const isLargeEnough = onAIPlatform ? 
-    (element.offsetHeight > 30 || element.offsetWidth > 150) :
-    (element.offsetHeight > 40 || element.offsetWidth > 200);
-  
-  return (isTextarea || isContentEditable || isInput || isPlatformSpecific) && isLargeEnough;
-}
-
-// Get text content from element
-function getElementText(element) {
-  if (element.tagName.toLowerCase() === 'textarea' || element.tagName.toLowerCase() === 'input') {
-    return element.value;
-  } else if (element.contentEditable === 'true' || element.getAttribute('contenteditable') === 'true') {
-    // For ProseMirror and similar editors, prefer innerText
-    return element.innerText || element.textContent || '';
-  }
-  return '';
-}
-
-// Set text content to element
-function setElementText(element, text) {
-  if (element.tagName.toLowerCase() === 'textarea' || element.tagName.toLowerCase() === 'input') {
-    element.value = text;
-    element.dispatchEvent(new Event('input', { bubbles: true }));
-    element.dispatchEvent(new Event('change', { bubbles: true }));
-  } else if (element.contentEditable === 'true' || element.getAttribute('contenteditable') === 'true') {
-    // For contenteditable elements like ProseMirror
-    element.focus();
-    
-    // Try to clear and set text
-    if (element.innerText !== undefined) {
-      element.innerText = text;
-    } else {
-      element.textContent = text;
-    }
-    
-    // Trigger events that frameworks listen to
-    element.dispatchEvent(new Event('input', { bubbles: true }));
-    element.dispatchEvent(new Event('change', { bubbles: true }));
-    element.dispatchEvent(new InputEvent('input', { bubbles: true, cancelable: true }));
-  }
-}
-
-// Wake up service worker if inactive
-async function wakeUpServiceWorker() {
-  try {
-    const response = await chrome.runtime.sendMessage({ action: 'ping' });
-    return response?.success === true;
-  } catch (error) {
-    console.warn('⚠️ Service worker may be inactive:', error);
-    return false;
-  }
-}
-
-// Enhance the current prompt
-async function enhanceCurrentPrompt() {
-  if (isProcessing || !currentActiveElement) return;
-  
-  const originalText = getElementText(currentActiveElement);
-  if (!originalText || originalText.length < 10) {
-    showNotification('Please enter a longer prompt to enhance (min 10 characters)');
-    return;
-  }
-  
-  isProcessing = true;
-  showLoadingState();
-  console.log('🎯 Starting enhancement for:', originalText.substring(0, 50) + '...');
-  
-  try {
-    // First, wake up service worker if needed
-    console.log('🔌 Checking service worker status...');
-    const isAwake = await wakeUpServiceWorker();
-    
-    if (!isAwake) {
-      console.warn('⚠️ Service worker inactive, attempting to wake up...');
-      // Try once more after a brief delay
-      await new Promise(resolve => setTimeout(resolve, 100));
-      const secondTry = await wakeUpServiceWorker();
-      if (!secondTry) {
-        throw new Error('Service worker is inactive. Please reload the extension.');
+// AI Enhancement (Gemini)
+async function enhanceWithGemini(text, apiKey, model) {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{
+          text: `You are an expert prompt engineer. Transform this user prompt into a detailed, structured prompt following the ROLE-OBJECTIVE-CONTEXT-REQUIREMENTS format:\n\n"${text}"`
+        }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1000
       }
-    }
-    
-    console.log('✅ Service worker is active');
-    
-    // Add timeout to prevent infinite loading
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Enhancement timed out after 30 seconds')), 30000)
-    );
-    
-    const enhancePromise = chrome.runtime.sendMessage({
-      action: 'enhancePrompt',
-      text: originalText
-    });
-    
-    // Race between enhancement and timeout
-    const response = await Promise.race([enhancePromise, timeoutPromise]);
-    
-    console.log('✅ Enhancement response:', response);
-    
-    if (response && response.success) {
-      // Show preview panel with enhanced prompt
-      showEnhancedPromptPanel(originalText, response.enhanced);
-      showNotification('✨ Prompt enhanced successfully!');
-    } else {
-      const errorMsg = response?.error || 'Unknown error occurred';
-      console.error('❌ Enhancement failed:', errorMsg);
-      showNotification('Failed to enhance: ' + errorMsg);
-    }
-  } catch (error) {
-    console.error('❌ Enhancement error:', error);
-    
-    if (error.message.includes('Service worker')) {
-      showNotification('⚠️ Extension inactive. Reload extension at brave://extensions/');
-    } else {
-      showNotification('Error: ' + error.message);
-    }
-  } finally {
-    isProcessing = false;
-    hideLoadingState();
-    console.log('🏁 Enhancement process completed');
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Gemini API error: ${response.status}`);
   }
+
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
 }
 
-// Show loading state on button
-function showLoadingState() {
-  if (enhancerButton) {
-    enhancerButton.classList.add('pw-loading');
-    enhancerButton.innerHTML = `
-      <div class="pw-spinner"></div>
-      <span>Enhancing...</span>
-    `;
-  }
-}
+// ==========================================
+// UI: ENHANCEMENT MODAL
+// ==========================================
 
-// Hide loading state
-function hideLoadingState() {
-  if (enhancerButton && currentActiveElement) {
-    enhancerButton.classList.remove('pw-loading');
-    enhancerButton.innerHTML = `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>Enhance</span>
-    `;
-  }
-}
+let enhanceModal = null;
 
-// Show enhanced prompt in a panel
-function showEnhancedPromptPanel(original, enhanced) {
-  // Remove existing panel if any
-  const existingPanel = document.getElementById('pw-enhanced-panel');
-  if (existingPanel) {
-    existingPanel.remove();
-  }
+function showEnhancementModal(original, enhanced) {
+  // Remove existing
+  if (enhanceModal) enhanceModal.remove();
   
-  const panel = document.createElement('div');
-  panel.id = 'pw-enhanced-panel';
-  panel.className = 'pw-panel';
-  panel.innerHTML = `
-    <div class="pw-panel-header">
-      <h3>✨ Enhanced Prompt</h3>
-      <button class="pw-close-btn" id="pw-close-panel">✕</button>
-    </div>
-    <div class="pw-panel-content">
-      <div class="pw-section">
-        <label>Original:</label>
-        <div class="pw-text-preview">${escapeHtml(original)}</div>
+  enhanceModal = document.createElement('div');
+  enhanceModal.id = 'pw-modal';
+  enhanceModal.innerHTML = `
+    <div class="pw-overlay"></div>
+    <div class="pw-modal-content">
+      <div class="pw-modal-header">
+        <h3>✨ Enhanced Prompt</h3>
+        <button class="pw-close">×</button>
       </div>
-      <div class="pw-section">
-        <label>Enhanced:</label>
-        <div class="pw-text-preview pw-enhanced">${escapeHtml(enhanced)}</div>
+      <div class="pw-modal-body">
+        <div class="pw-section">
+          <label>Original:</label>
+          <div class="pw-text">${escapeHtml(original)}</div>
+        </div>
+        <div class="pw-section">
+          <label>Enhanced:</label>
+          <div class="pw-text pw-enhanced">${escapeHtml(enhanced)}</div>
+        </div>
       </div>
-    </div>
-    <div class="pw-panel-footer">
-      <button class="pw-btn pw-btn-secondary" id="pw-copy-btn">📋 Copy</button>
-      <button class="pw-btn pw-btn-primary" id="pw-apply-btn">✓ Apply</button>
+      <div class="pw-modal-footer">
+        <button class="pw-btn pw-btn-secondary pw-copy-btn">📋 Copy</button>
+        <button class="pw-btn pw-btn-primary pw-apply-btn">✓ Apply</button>
+      </div>
     </div>
   `;
+  document.body.appendChild(enhanceModal);
   
-  document.body.appendChild(panel);
+  // Add event listeners (avoid inline onclick to prevent escaping issues)
+  const closeBtn = enhanceModal.querySelector('.pw-close');
+  const overlay = enhanceModal.querySelector('.pw-overlay');
+  const copyBtn = enhanceModal.querySelector('.pw-copy-btn');
+  const applyBtn = enhanceModal.querySelector('.pw-apply-btn');
   
-  // Add event listeners
-  document.getElementById('pw-close-panel').addEventListener('click', () => panel.remove());
-  document.getElementById('pw-copy-btn').addEventListener('click', () => {
+  // Close handlers
+  closeBtn.addEventListener('click', () => enhanceModal.remove());
+  overlay.addEventListener('click', () => enhanceModal.remove());
+  
+  // Copy handler
+  copyBtn.addEventListener('click', () => {
     navigator.clipboard.writeText(enhanced);
-    showNotification('Copied to clipboard!');
-  });
-  document.getElementById('pw-apply-btn').addEventListener('click', () => {
-    if (currentActiveElement) {
-      setElementText(currentActiveElement, enhanced);
-      showNotification('Enhanced prompt applied!');
-      panel.remove();
-    }
+    copyBtn.textContent = '✓ Copied!';
+    setTimeout(() => {
+      copyBtn.textContent = '📋 Copy';
+    }, 2000);
   });
   
-  // Close on outside click
-  panel.addEventListener('click', (e) => {
-    if (e.target === panel) {
-      panel.remove();
+  // Apply handler
+  applyBtn.addEventListener('click', () => {
+    if (currentInput) {
+      setTextTo(currentInput, enhanced);
+      alert('✅ Enhanced prompt applied!');
+    } else {
+      navigator.clipboard.writeText(enhanced);
+      alert('✅ Copied to clipboard! (No active input to apply to)');
     }
+    enhanceModal.remove();
   });
+  
+  // Update stats
+  chrome.runtime.sendMessage({ action: 'updateStats' });
 }
 
-// Show notification
-function showNotification(message) {
-  const notification = document.createElement('div');
-  notification.className = 'pw-notification';
-  notification.textContent = message;
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.classList.add('pw-show');
-  }, 10);
-  
-  setTimeout(() => {
-    notification.classList.remove('pw-show');
-    setTimeout(() => notification.remove(), 300);
-  }, 3000);
-}
-
-// Escape HTML
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
-  return div.innerHTML;
+  return div.innerHTML.replace(/\n/g, '<br>');
 }
 
-// Monitor focus changes
-function handleFocusChange(e) {
-  const element = e.target;
+// ==========================================
+// UI: AUTO-DETECT FLOATING BUTTON
+// ==========================================
+
+let floatingBtn = null;
+let currentInput = null;
+
+const AI_SITES = ['chat.openai.com', 'claude.ai', 'gemini.google.com', 'copilot.microsoft.com'];
+const isAISite = AI_SITES.some(site => window.location.hostname.includes(site));
+
+function createFloatingButton() {
+  if (floatingBtn) return floatingBtn;
   
-  if (isPromptInput(element)) {
-    currentActiveElement = element;
-    
-    // Show button if there's content
-    const text = getElementText(element);
-    if (text && text.length >= 10) {
-      positionEnhancerButton(element);
-    } else {
-      hideEnhancerButton();
-    }
-    
-    // Monitor input changes
-    element.addEventListener('input', handleInputChange);
-    element.addEventListener('scroll', handleScroll);
-  } else {
-    if (currentActiveElement) {
-      currentActiveElement.removeEventListener('input', handleInputChange);
-      currentActiveElement.removeEventListener('scroll', handleScroll);
-    }
-    currentActiveElement = null;
-    hideEnhancerButton();
-  }
+  floatingBtn = document.createElement('button');
+  floatingBtn.id = 'pw-float-btn';
+  floatingBtn.innerHTML = '✨ Enhance';
+  floatingBtn.style.display = 'none';
+  floatingBtn.onclick = () => handleEnhance();
+  document.body.appendChild(floatingBtn);
+  return floatingBtn;
 }
 
-// Handle input changes
-function handleInputChange(e) {
-  const text = getElementText(e.target);
-  if (text && text.length >= 10) {
-    positionEnhancerButton(e.target);
-  } else {
-    hideEnhancerButton();
-  }
-}
-
-// Handle scroll to reposition button
-function handleScroll(e) {
-  if (currentActiveElement && enhancerButton && enhancerButton.style.display !== 'none') {
-    positionEnhancerButton(currentActiveElement);
-  }
-}
-
-// Handle window resize
-function handleResize() {
-  if (currentActiveElement && enhancerButton && enhancerButton.style.display !== 'none') {
-    positionEnhancerButton(currentActiveElement);
-  }
-}
-
-// Initialize
-function init() {
-  console.log('🪄 Prompt Wizard extension loaded');
+function positionButton(element) {
+  if (!floatingBtn) createFloatingButton();
   
-  // Check if background script is available
-  try {
-    chrome.runtime.sendMessage({ action: 'ping' }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error('❌ Background script not responding:', chrome.runtime.lastError);
+  const rect = element.getBoundingClientRect();
+  floatingBtn.style.top = `${rect.bottom + window.scrollY - 40}px`;
+  floatingBtn.style.left = `${rect.right + window.scrollX - 120}px`;
+  floatingBtn.style.display = 'flex';
+}
+
+function hideButton() {
+  if (floatingBtn) floatingBtn.style.display = 'none';
+}
+
+// Detect suitable input fields
+function isPromptInput(el) {
+  if (!el) return false;
+  const tag = el.tagName?.toLowerCase();
+  return (
+    tag === 'textarea' ||
+    (tag === 'input' && (el.type === 'text' || el.type === 'search')) ||
+    el.contentEditable === 'true' ||
+    el.matches?.('.ProseMirror, [role="textbox"], [data-slate-editor]')
+  );
+}
+
+function getTextFrom(el) {
+  if (!el) return '';
+  const tag = el.tagName?.toLowerCase();
+  if (tag === 'textarea' || tag === 'input') return el.value;
+  return el.innerText || el.textContent || '';
+}
+
+function setTextTo(el, text) {
+  if (!el) return;
+  const tag = el.tagName?.toLowerCase();
+  if (tag === 'textarea' || tag === 'input') {
+    el.value = text;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  } else {
+    el.innerText = text;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+
+// Monitor focus for auto-detect
+document.addEventListener('focusin', (e) => {
+  if (isPromptInput(e.target)) {
+    currentInput = e.target;
+    
+    // Show button after typing
+    const checkText = () => {
+      const text = getTextFrom(currentInput);
+      if (text && text.length > 10) {
+        positionButton(currentInput);
       } else {
-        console.log('✅ Background script connected');
+        hideButton();
       }
-    });
-  } catch (error) {
-    console.error('❌ Failed to connect to background script:', error);
+    };
+    
+    currentInput.addEventListener('input', checkText);
+    checkText();
   }
-  
-  // Add event listeners
-  document.addEventListener('focusin', handleFocusChange);
-  document.addEventListener('focusout', (e) => {
-    // Small delay to allow clicking the button
-    setTimeout(() => {
-      if (!document.activeElement || !isPromptInput(document.activeElement)) {
-        hideEnhancerButton();
-      }
-    }, 200);
-  });
-  
-  window.addEventListener('resize', handleResize);
-  window.addEventListener('scroll', () => {
-    if (currentActiveElement && enhancerButton && enhancerButton.style.display !== 'none') {
-      positionEnhancerButton(currentActiveElement);
+});
+
+document.addEventListener('focusout', () => {
+  setTimeout(() => {
+    if (!document.activeElement || !isPromptInput(document.activeElement)) {
+      hideButton();
+      currentInput = null;
     }
-  });
+  }, 200);
+});
+
+// ==========================================
+// ENHANCE FUNCTION (Main Logic)
+// ==========================================
+
+async function handleEnhance(text = null) {
+  let originalText = text;
   
-  // Show welcome notification on AI platforms
-  if (isAIPlatform()) {
-    setTimeout(() => {
-      showNotification('🪄 Prompt Wizard is active! Focus on any text input to enhance your prompts.');
-    }, 1000);
+  // Get text from various sources
+  if (!originalText) {
+    // Try selected text first
+    originalText = window.getSelection()?.toString()?.trim();
   }
+  if (!originalText && currentInput) {
+    // Try current input
+    originalText = getTextFrom(currentInput);
+  }
+  if (!originalText) {
+    // Try focused element
+    originalText = getTextFrom(document.activeElement);
+  }
+  
+  if (!originalText || originalText.length < 3) {
+    alert('⚠️ Please select or enter text to enhance (minimum 3 characters)');
+    return;
+  }
+  
+  console.log('🎯 Enhancing:', originalText.substring(0, 50) + '...');
+  
+  // Get settings to check if AI enhancement is enabled
+  const settings = await chrome.storage.sync.get(['apiProvider', 'apiKey', 'defaultModel', 'geminiModel']);
+  
+  let enhanced;
+  try {
+    // Use AI if provider is configured and API key exists
+    if (settings.apiProvider === 'openrouter' && settings.apiKey) {
+      console.log('🤖 Using OpenRouter AI enhancement');
+      enhanced = await enhanceWithOpenRouter(originalText, settings.apiKey, settings.defaultModel);
+    } else if (settings.apiProvider === 'gemini' && settings.apiKey) {
+      console.log('🤖 Using Gemini AI enhancement');
+      enhanced = await enhanceWithGemini(originalText, settings.apiKey, settings.geminiModel);
+    } else {
+      // Fallback to rule-based enhancement
+      console.log('📝 Using rule-based enhancement');
+      enhanced = enhancePrompt(originalText);
+    }
+  } catch (error) {
+    console.error('❌ AI enhancement failed:', error);
+    console.log('📝 Falling back to rule-based enhancement');
+    enhanced = enhancePrompt(originalText);
+  }
+  
+  // Show modal
+  showEnhancementModal(originalText, enhanced);
+  
+  console.log('✅ Enhancement complete!');
 }
 
-// Start when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+// ==========================================
+// MESSAGE LISTENERS (Context Menu & Keyboard)
+// ==========================================
 
-// Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'enhanceSuccess') {
-    showEnhancedPromptPanel(request.original, request.enhanced);
+  console.log('📨 Content script received:', request.action);
+  
+  if (request.action === 'enhanceFromContextMenu') {
+    handleEnhance(request.text);
     sendResponse({ success: true });
   }
-  return true;
+  
+  if (request.action === 'enhanceFromKeyboard') {
+    handleEnhance();
+    sendResponse({ success: true });
+  }
+  
+  return false;
 });
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+
+createFloatingButton();
+
+if (isAISite) {
+  setTimeout(() => {
+    console.log('✅ Prompt Wizard active on AI platform!');
+  }, 1000);
+}
+
+console.log('🚀 Prompt Wizard ready! Use: Auto-button | Right-click | Ctrl+Shift+E');

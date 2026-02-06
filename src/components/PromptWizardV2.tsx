@@ -535,13 +535,17 @@ export default function PromptWizardV2() {
               {useAPI && (
                 <div>
                   <label className={`block text-sm font-medium ${text} mb-2`}>
-                    OpenRouter API Key <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline text-xs">(Get key)</a>
+                    OPENROUTER / GEMINI API KEY <span className="text-xs opacity-75">(
+                      <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">OpenRouter</a>
+                      {" or "}
+                      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">Gemini</a>
+                    )</span>
                   </label>
                   <input
                     type="password"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="sk-or-..."
+                    placeholder="sk-or-... or AIza..."
                     className={`w-full p-3 border rounded-lg ${inputClass} focus:ring-2 focus:ring-teal-500 text-sm`}
                   />
                 </div>

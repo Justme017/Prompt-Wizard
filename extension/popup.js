@@ -5,7 +5,9 @@ async function loadSettings() {
   const settings = await chrome.storage.sync.get({
     autoDetect: true,
     showNotifications: true,
+    apiProvider: 'none',
     defaultModel: 'gemma-3-12b',
+    geminiModel: 'gemini-1.5-flash',
     apiKey: '',
     promptsEnhanced: 0,
     timeSaved: 0
@@ -14,41 +16,92 @@ async function loadSettings() {
   // Update UI
   document.getElementById('toggle-auto-detect').classList.toggle('active', settings.autoDetect);
   document.getElementById('toggle-notifications').classList.toggle('active', settings.showNotifications);
+  document.getElementById('api-provider').value = settings.apiProvider;
   document.getElementById('default-model').value = settings.defaultModel;
+  document.getElementById('gemini-model').value = settings.geminiModel;
   document.getElementById('api-key').value = settings.apiKey;
   document.getElementById('prompts-enhanced').textContent = settings.promptsEnhanced;
   document.getElementById('time-saved').textContent = Math.floor(settings.timeSaved / 60) + 'h';
 
+  // Show/hide provider-specific fields
+  updateProviderUI(settings.apiProvider);
+
   return settings;
 }
 
-// Verify API key with OpenRouter
-async function verifyApiKey(apiKey) {
+// Update UI based on selected provider
+function updateProviderUI(provider) {
+  const modelSelector = document.getElementById('model-selector');
+  const geminiModelSelector = document.getElementById('gemini-model-selector');
+  const apiKeyGroup = document.getElementById('api-key-group');
+  const apiKeyLabel = document.getElementById('api-key-label');
+  const apiKeyInput = document.getElementById('api-key');
+  const apiKeyHelp = document.getElementById('api-key-help');
+
+  // Hide all provider-specific elements
+  modelSelector.style.display = 'none';
+  geminiModelSelector.style.display = 'none';
+  apiKeyGroup.style.display = 'none';
+
+  if (provider === 'openrouter') {
+    modelSelector.style.display = 'block';
+    apiKeyGroup.style.display = 'block';
+    apiKeyLabel.textContent = 'OpenRouter API Key';
+    apiKeyInput.placeholder = 'sk-or-...';
+    apiKeyHelp.innerHTML = 'Free tier available. Get key from <a href="https://openrouter.ai/keys" target="_blank" style="color: #fff; text-decoration: underline;">openrouter.ai/keys</a>';
+  } else if (provider === 'gemini') {
+    geminiModelSelector.style.display = 'block';
+    apiKeyGroup.style.display = 'block';
+    apiKeyLabel.textContent = 'Google AI API Key';
+    apiKeyInput.placeholder = 'AIza...';
+    apiKeyHelp.innerHTML = 'Free tier: 15 RPM, 1M TPM. Get key from <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #fff; text-decoration: underline;">Google AI Studio</a>';
+  }
+}
+
+// Verify API key based on provider
+async function verifyApiKey(apiKey, provider) {
   if (!apiKey || !apiKey.trim()) {
     return { valid: false, message: '' };
   }
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    if (provider === 'openrouter') {
+      const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      return { valid: true, message: 'Valid API key', data };
-    } else if (response.status === 401) {
-      return { valid: false, message: 'Invalid API key' };
-    } else {
-      return { valid: false, message: 'Could not verify' };
+      if (response.ok) {
+        const data = await response.json();
+        return { valid: true, message: 'Valid API key', data };
+      } else if (response.status === 401) {
+        return { valid: false, message: 'Invalid API key' };
+      } else {
+        return { valid: false, message: 'Could not verify' };
+      }
+    } else if (provider === 'gemini') {
+      // Verify Gemini API key with a simple test request
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models?key=${apiKey}`);
+      
+      if (response.ok) {
+        return { valid: true, message: 'Valid API key' };
+      } else if (response.status === 400) {
+        return { valid: false, message: 'Invalid API key format' };
+      } else if (response.status === 403) {
+        return { valid: false, message: 'API key not authorized' };
+      } else {
+        return { valid: false, message: 'Could not verify' };
+      }
     }
   } catch (error) {
     console.error('API verification error:', error);
     return { valid: false, message: 'Verification failed' };
   }
+  
+  return { valid: false, message: 'Unknown provider' };
 }
 
 // Update API key status indicator
@@ -77,8 +130,7 @@ function updateApiKeyStatus(status, message = '') {
     helpText.style.color = '#ef4444';
   } else if (status === 'empty') {
     statusDiv.style.display = 'none';
-    helpText.innerHTML = 'Free tier available. Get key from <a href="https://openrouter.ai/keys" target="_blank" style="color: #fff; text-decoration: underline;">openrouter.ai</a>';
-    helpText.style.color = 'rgba(255, 255, 255, 0.8)';
+    // Help text is already set by updateProviderUI
   }
 }
 
@@ -91,14 +143,32 @@ async function saveSetting(key, value) {
 document.addEventListener('DOMContentLoaded', async () => {
   const settings = await loadSettings();
 
-  // Verify API key on load if present
-  if (settings.apiKey && settings.apiKey.trim()) {
+  // Verify API key on load if present and provider is selected
+  if (settings.apiKey && settings.apiKey.trim() && settings.apiProvider !== 'none') {
     updateApiKeyStatus('verifying');
-    const result = await verifyApiKey(settings.apiKey);
+    const result = await verifyApiKey(settings.apiKey, settings.apiProvider);
     updateApiKeyStatus(result.valid ? 'valid' : 'invalid', result.message);
   } else {
     updateApiKeyStatus('empty');
   }
+
+  // Provider selection
+  document.getElementById('api-provider').addEventListener('change', function() {
+    const provider = this.value;
+    saveSetting('apiProvider', provider);
+    updateProviderUI(provider);
+    
+    // Re-verify API key for new provider
+    const apiKey = document.getElementById('api-key').value.trim();
+    if (apiKey && provider !== 'none') {
+      updateApiKeyStatus('verifying');
+      verifyApiKey(apiKey, provider).then(result => {
+        updateApiKeyStatus(result.valid ? 'valid' : 'invalid', result.message);
+      });
+    } else {
+      updateApiKeyStatus('empty');
+    }
+  });
 
   // Toggle switches
   document.getElementById('toggle-auto-detect').addEventListener('click', function() {
@@ -114,6 +184,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Model selection
   document.getElementById('default-model').addEventListener('change', function() {
     saveSetting('defaultModel', this.value);
+  });
+
+  document.getElementById('gemini-model').addEventListener('change', function() {
+    saveSetting('geminiModel', this.value);
   });
 
   // API key with verification
@@ -135,7 +209,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Debounce verification (wait 1 second after user stops typing)
     verifyTimeout = setTimeout(async () => {
-      const result = await verifyApiKey(apiKey);
+      const provider = document.getElementById('api-provider').value;
+      if (provider === 'none') {
+        updateApiKeyStatus('empty');
+        return;
+      }
+      
+      const result = await verifyApiKey(apiKey, provider);
       updateApiKeyStatus(result.valid ? 'valid' : 'invalid', result.message);
       
       // Only save if valid or if user explicitly wants to save invalid key
