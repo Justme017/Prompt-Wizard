@@ -162,8 +162,22 @@ const generateRuleBasedPrompt = (input, modelId, formatId, skillId, variables = 
     data = 'Ensure accuracy, clarity, and actionable information.';
   }
 
-  const formatNote = format.id !== 'text' ? ` Format output as ${format.name}.` : '';
-  return `ROLE: ${role}\n\nOBJECTIVE: ${objective}\n\nCONTEXT: ${context}\n\nDATA: ${data}${formatNote}`;
+  // Format output based on selected format
+  if (format.id === 'json') {
+    return JSON.stringify({
+      role: role,
+      objective: objective,
+      context: context,
+      data: data,
+      input: processedInput
+    }, null, 2);
+  } else if (format.id === 'markdown') {
+    return `# Enhanced Prompt\n\n## ROLE\n${role}\n\n## OBJECTIVE\n${objective}\n\n## CONTEXT\n${context}\n\n## DATA\n${data}`;
+  } else if (format.id === 'code') {
+    return `\`\`\`\nROLE: ${role}\n\nOBJECTIVE: ${objective}\n\nCONTEXT: ${context}\n\nDATA: ${data}\n\`\`\``;
+  } else {
+    return `ROLE: ${role}\n\nOBJECTIVE: ${objective}\n\nCONTEXT: ${context}\n\nDATA: ${data}`;
+  }
 };
 
 const generateAIPrompt = async (input, modelId, formatId, apiKey, skillId, variables = {}) => {
@@ -172,14 +186,58 @@ const generateAIPrompt = async (input, modelId, formatId, apiKey, skillId, varia
   const format = OUTPUT_FORMATS.find(f => f.id === formatId);
   const skill = SKILL_TEMPLATES.find(s => s.id === skillId);
 
-  const systemPrompt = `You are a prompt enhancement assistant. Rewrite the user's prompt in this structured format:
+  let systemPrompt = '';
+  
+  if (format.id === 'json') {
+    systemPrompt = `You are a prompt enhancement assistant. Rewrite the user's prompt as a JSON object with these exact fields:
+{
+  "role": "${skill ? skill.skill : 'Expert Assistant'}",
+  "objective": "[Clear goal based on user's request]",
+  "context": "[Relevant context for the task]",
+  "data": "[Data requirements, constraints, guidelines]",
+  "input": "${processedInput}"
+}
+
+Output ONLY valid JSON, nothing else.`;
+  } else if (format.id === 'markdown') {
+    systemPrompt = `You are a prompt enhancement assistant. Rewrite the user's prompt in markdown format:
+
+# Enhanced Prompt
+
+## ROLE
+${skill ? skill.skill : 'Expert Assistant'}
+
+## OBJECTIVE
+[Clear goal based on user's request]
+
+## CONTEXT
+[Relevant context for: ${processedInput}]
+
+## DATA
+[Data requirements, constraints, guidelines]
+
+Output ONLY in this markdown format.`;
+  } else if (format.id === 'code') {
+    systemPrompt = `You are a prompt enhancement assistant. Rewrite the user's prompt in a code block format:
+
+\`\`\`
+ROLE: ${skill ? skill.skill : 'Expert Assistant'}
+OBJECTIVE: [Clear goal based on user's request]
+CONTEXT: [Relevant context for: ${processedInput}]
+DATA: [Data requirements, constraints, guidelines]
+\`\`\`
+
+Output ONLY in this code block format.`;
+  } else {
+    systemPrompt = `You are a prompt enhancement assistant. Rewrite the user's prompt in this structured format:
 
 ROLE: ${skill ? skill.skill : 'Expert Assistant'}
 OBJECTIVE: [Clear goal based on user's request]
 CONTEXT: [Relevant context for: ${processedInput}]
 DATA: [Data requirements, constraints, guidelines]
 
-Output ONLY in this format. Format as ${format.name} if applicable.`;
+Output ONLY in this format.`;
+  }
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
