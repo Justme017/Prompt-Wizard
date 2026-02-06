@@ -46,8 +46,9 @@
   height: 100%;
   z-index: 2147483647;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 80px;
   animation: modalFadeIn 0.2s ease;
 }
 
@@ -69,12 +70,12 @@
 /* Modal Content */
 .pw-modal-content {
   position: relative;
-  width: 90%;
-  max-width: 800px;
-  max-height: 80vh;
+  width: 600px;
+  max-width: 90vw;
+  max-height: 70vh;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   animation: modalSlideUp 0.3s ease;
@@ -108,14 +109,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 16px 20px;
   background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%);
   color: white;
 }
 
 .pw-modal-header h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -124,9 +125,9 @@
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
-  font-size: 24px;
-  width: 32px;
-  height: 32px;
+  font-size: 20px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -144,13 +145,25 @@
 
 /* Body */
 .pw-modal-body {
-  padding: 24px;
+  padding: 20px;
   overflow-y: auto;
   flex: 1;
+  max-height: calc(70vh - 140px);
+}
+
+.pw-mode-indicator {
+  text-align: center;
+  margin-bottom: 12px;
+  padding: 6px 12px;
+  background: rgba(13, 148, 136, 0.1);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0d9488;
 }
 
 .pw-section {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .pw-section:last-child {
@@ -169,16 +182,18 @@
 }
 
 .pw-text {
-  padding: 16px;
+  padding: 12px;
   background: #f8fafc;
   border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.5;
   color: #334155;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   white-space: pre-wrap;
   word-wrap: break-word;
   border: 1px solid #e2e8f0;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .pw-enhanced {
@@ -190,8 +205,8 @@
 /* Footer */
 .pw-modal-footer {
   display: flex;
-  gap: 12px;
-  padding: 20px 24px;
+  gap: 10px;
+  padding: 16px 20px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   justify-content: flex-end;
@@ -205,10 +220,10 @@
 }
 
 .pw-btn {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -255,8 +270,8 @@
 /* Responsive */
 @media (max-width: 640px) {
   .pw-modal-content {
-    width: 95%;
-    max-height: 90vh;
+    width: 95vw;
+    max-height: 75vh;
   }
   
   .pw-modal-body {
@@ -265,11 +280,17 @@
   
   .pw-modal-footer {
     flex-direction: column;
+    padding: 12px 16px;
   }
   
   .pw-btn {
     width: 100%;
     justify-content: center;
+  }
+  
+  .pw-text {
+    font-size: 12px;
+    max-height: 150px;
   }
 }
 

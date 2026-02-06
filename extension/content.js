@@ -113,9 +113,13 @@ async function enhanceWithGemini(text, apiKey, model) {
 
 let enhanceModal = null;
 
-function showEnhancementModal(original, enhanced) {
+function showEnhancementModal(original, enhanced, mode = 'rule-based') {
   // Remove existing
   if (enhanceModal) enhanceModal.remove();
+  
+  const modeLabel = mode === 'openrouter' ? '🤖 AI-Enhanced (OpenRouter)' : 
+                   mode === 'gemini' ? '🤖 AI-Enhanced (Gemini)' : 
+                   '📝 Rule-Based Enhancement';
   
   enhanceModal = document.createElement('div');
   enhanceModal.id = 'pw-modal';
@@ -127,6 +131,7 @@ function showEnhancementModal(original, enhanced) {
         <button class="pw-close">×</button>
       </div>
       <div class="pw-modal-body">
+        <div class="pw-mode-indicator">${modeLabel}</div>
         <div class="pw-section">
           <label>Original:</label>
           <div class="pw-text">${escapeHtml(original)}</div>
@@ -311,28 +316,44 @@ async function handleEnhance(text = null) {
   // Get settings to check if AI enhancement is enabled
   const settings = await chrome.storage.sync.get(['apiProvider', 'apiKey', 'defaultModel', 'geminiModel']);
   
+  console.log('📋 Settings:', {
+    provider: settings.apiProvider,
+    hasKey: !!settings.apiKey,
+    keyLength: settings.apiKey?.length || 0,
+    model: settings.defaultModel || settings.geminiModel
+  });
+  
   let enhanced;
+  let usedMode = 'rule-based';
+  
   try {
     // Use AI if provider is configured and API key exists
-    if (settings.apiProvider === 'openrouter' && settings.apiKey) {
-      console.log('🤖 Using OpenRouter AI enhancement');
-      enhanced = await enhanceWithOpenRouter(originalText, settings.apiKey, settings.defaultModel);
-    } else if (settings.apiProvider === 'gemini' && settings.apiKey) {
-      console.log('🤖 Using Gemini AI enhancement');
-      enhanced = await enhanceWithGemini(originalText, settings.apiKey, settings.geminiModel);
+    const hasValidKey = settings.apiKey && settings.apiKey.trim().length > 0;
+    
+    if (settings.apiProvider === 'openrouter' && hasValidKey) {
+      console.log('🤖 Using OpenRouter AI enhancement with model:', settings.defaultModel);
+      enhanced = await enhanceWithOpenRouter(originalText, settings.apiKey.trim(), settings.defaultModel);
+      usedMode = 'openrouter';
+      console.log('✅ OpenRouter enhancement received');
+    } else if (settings.apiProvider === 'gemini' && hasValidKey) {
+      console.log('🤖 Using Gemini AI enhancement with model:', settings.geminiModel);
+      enhanced = await enhanceWithGemini(originalText, settings.apiKey.trim(), settings.geminiModel);
+      usedMode = 'gemini';
+      console.log('✅ Gemini enhancement received');
     } else {
       // Fallback to rule-based enhancement
-      console.log('📝 Using rule-based enhancement');
+      console.log('📝 Using rule-based enhancement (provider:', settings.apiProvider, ', hasKey:', hasValidKey, ')');
       enhanced = enhancePrompt(originalText);
     }
   } catch (error) {
     console.error('❌ AI enhancement failed:', error);
     console.log('📝 Falling back to rule-based enhancement');
     enhanced = enhancePrompt(originalText);
+    usedMode = 'rule-based';
   }
   
-  // Show modal
-  showEnhancementModal(originalText, enhanced);
+  // Show modal with mode indicator
+  showEnhancementModal(originalText, enhanced, usedMode);
   
   console.log('✅ Enhancement complete!');
 }
